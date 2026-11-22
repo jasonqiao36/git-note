@@ -1,0 +1,238 @@
+name: Build Android APK (Xiaomi 14 Pro / HyperOS)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build variant (release requires keystore secrets)'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+          - debug
+          - release
+          - both
+      create_release:
+        description: 'Publish APK to GitHub Releases (direct .apk download on phone)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-build-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build-apk:
+    name: Build GitNote APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK & accept licenses
+        uses: android-actions/setup-android@v3
+
+      - name: Accept all Android SDK licenses
+        run: |
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+
+      - name: Set up Gradle (matches gradle-wrapper.properties)
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+
+      - name: Prepare signing keystores
+        id: keystores
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          # 1. Decode the fixed debug keystore committed in the repository.
+          #    NEVER generate a random keystore in CI, otherwise the signature changes on every
+          #    build and overwrite-installing updates on Xiaomi 14 Pro will fail!
+          if [ ! -f "debug.keystore.base64" ]; then
+            echo "::error::Missing debug.keystore.base64 in repository root. Refusing to generate a random keystore because changing signatures breaks overwrite updates."
+            exit 1
+          fi
+          tr -d '\n\r ' < debug.keystore.base64 | base64 -d > debug.keystore
+          echo "Decoded fixed debug.keystore from debug.keystore.base64"
+
+          # 2. Optionally decode fixed release keystore from GitHub Secrets (never randomly generated)
+          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$STORE_PASSWORD" ] && [ -n "$KEY_PASSWORD" ]; then
+            printf '%s' "$KEYSTORE_BASE64" | tr -d '\n\r ' | base64 -d > my-upload-key.jks
+            echo "has_release_keystore=true" >> "$GITHUB_OUTPUT"
+            echo "Decoded fixed release keystore (my-upload-key.jks)"
+          else
+            echo "has_release_keystore=false" >> "$GITHUB_OUTPUT"
+            echo "Release keystore secrets not set; skipping release signing unless configured."
+          fi
+
+      - name: Determine build targets
+        id: targets
+        env:
+          INPUT_BUILD_TYPE: ${{ github.event.inputs.build_type }}
+          HAS_RELEASE: ${{ steps.keystores.outputs.has_release_keystore }}
+          EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REF: ${{ github.ref }}
+        run: |
+          BUILD_DEBUG=false
+          BUILD_RELEASE=false
+
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            case "$INPUT_BUILD_TYPE" in
+              debug)
+                BUILD_DEBUG=true
+                ;;
+              release)
+                if [ "$HAS_RELEASE" != "true" ]; then
+                  echo "::error::Release build requires fixed GitHub Secrets: KEYSTORE_BASE64, STORE_PASSWORD, and KEY_PASSWORD (keyAlias must be 'upload')."
+                  exit 1
+                fi
+                BUILD_RELEASE=true
+                ;;
+              both)
+                BUILD_DEBUG=true
+                if [ "$HAS_RELEASE" = "true" ]; then
+                  BUILD_RELEASE=true
+                else
+                  echo "::warning::Release keystore secrets are not configured; building Debug APK only."
+                fi
+                ;;
+            esac
+          elif [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            BUILD_DEBUG=true
+            if [ "$HAS_RELEASE" = "true" ]; then
+              BUILD_RELEASE=true
+            fi
+          else
+            BUILD_DEBUG=true
+          fi
+
+          echo "build_debug=$BUILD_DEBUG" >> "$GITHUB_OUTPUT"
+          echo "build_release=$BUILD_RELEASE" >> "$GITHUB_OUTPUT"
+
+      - name: Build Debug APK
+        if: steps.targets.outputs.build_debug == 'true'
+        run: gradle :app:assembleDebug --no-daemon --stacktrace
+
+      - name: Build Release APK
+        if: steps.targets.outputs.build_release == 'true'
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/my-upload-key.jks
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: gradle :app:assembleRelease --no-daemon --stacktrace
+
+      - name: Collect & verify APKs (V2/V3 signature & cert check for HyperOS)
+        id: package
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_REF_TYPE: ${{ github.ref_type }}
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          mkdir -p dist
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            VERSION_SUFFIX="$GITHUB_REF_NAME"
+          else
+            VERSION_SUFFIX="build-${GITHUB_RUN_NUMBER}"
+          fi
+
+          APKSIGNER="$(find "${ANDROID_HOME}/build-tools" -name apksigner 2>/dev/null | sort -V | tail -n 1 || true)"
+
+          if [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
+            DEBUG_APK="dist/GitNote-${VERSION_SUFFIX}-debug.apk"
+            cp app/build/outputs/apk/debug/app-debug.apk "$DEBUG_APK"
+            if [ -n "$APKSIGNER" ]; then
+              "$APKSIGNER" verify --verbose --print-certs "$DEBUG_APK"
+            fi
+          fi
+
+          if [ -f "app/build/outputs/apk/release/app-release.apk" ]; then
+            RELEASE_APK="dist/GitNote-${VERSION_SUFFIX}-release.apk"
+            cp app/build/outputs/apk/release/app-release.apk "$RELEASE_APK"
+            if [ -n "$APKSIGNER" ]; then
+              "$APKSIGNER" verify --verbose --print-certs "$RELEASE_APK"
+            fi
+          fi
+
+          ls -lh dist/
+
+      - name: Write build summary
+        if: always()
+        env:
+          HAS_RELEASE: ${{ steps.keystores.outputs.has_release_keystore }}
+        run: |
+          shopt -s nullglob
+          APKSIGNER="$(find "${ANDROID_HOME}/build-tools" -name apksigner 2>/dev/null | sort -V | tail -n 1 || true)"
+          {
+            echo "## GitNote Android APK Build Summary"
+            echo ""
+            echo "- **Application ID**: \`com.aistudio.gitnote.xmkpzr\`"
+            echo "- **Target Device Compatibility**: Xiaomi 14 Pro (Snapdragon 8 Gen 3 / \`arm64-v8a\`, HyperOS / Android 14+)"
+            echo "- **SDK**: \`minSdk 24\`, \`targetSdk 36\`, \`compileSdk 36.1\`"
+            echo ""
+            APKS=(dist/*.apk)
+            if [ "${#APKS[@]}" -gt 0 ]; then
+              echo "### Generated APKs"
+              echo "| File | Size | Cert SHA-256 (fixed for overwrite updates) | File SHA-256 |"
+              echo "|------|------|--------------------------------------------|--------------|"
+              for f in "${APKS[@]}"; do
+                SIZE="$(du -h "$f" | cut -f1)"
+                FILE_SHA="$(sha256sum "$f" | cut -d' ' -f1)"
+                CERT_SHA="N/A"
+                if [ -n "$APKSIGNER" ]; then
+                  CERT_SHA="$("$APKSIGNER" verify --print-certs "$f" 2>/dev/null | awk -F': ' '/Signer #1 certificate SHA-256 digest:/ {print $2; exit}' || echo 'N/A')"
+                fi
+                echo "| \`$(basename "$f")\` | ${SIZE} | \`${CERT_SHA}\` | \`${FILE_SHA}\` |"
+              done
+            fi
+            if [ "$HAS_RELEASE" != "true" ]; then
+              echo ""
+              echo "> **Overwrite-Install Tip**: Debug APK is ALWAYS signed with the fixed \`debug.keystore.base64\` in this repository (never randomly regenerated), so future builds overwrite-install cleanly on your Xiaomi 14 Pro without losing data. To use your own fixed Release signing key instead, configure \`KEYSTORE_BASE64\`, \`STORE_PASSWORD\`, and \`KEY_PASSWORD\` (alias \`upload\`) in **Settings → Secrets and variables → Actions**."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: GitNote-APK-${{ github.run_number }}
+          path: dist/*.apk
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: >-
+          startsWith(github.ref, 'refs/tags/v') ||
+          (github.event_name == 'workflow_dispatch' && github.event.inputs.create_release == 'true')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('build-{0}', github.run_number) }}
+          name: GitNote ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('Build #{0}', github.run_number) }}
+          generate_release_notes: true
+          files: dist/*.apk
+
+      - name: Clean up temporary keystores
+        if: always()
+        run: rm -f debug.keystore my-upload-key.jks
