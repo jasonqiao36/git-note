@@ -14,11 +14,12 @@ on:
   workflow_dispatch:
     inputs:
       build_type:
-        description: 'Build variant (release requires keystore secrets)'
+        description: 'Build variant (auto uses configured fixed keystore)'
         required: true
-        default: 'debug'
+        default: 'auto'
         type: choice
         options:
+          - auto
           - debug
           - release
           - both
@@ -69,34 +70,43 @@ jobs:
       - name: Prepare signing keystores
         id: keystores
         env:
+          DEBUG_KEYSTORE_BASE64: ${{ secrets.DEBUG_KEYSTORE_BASE64 }}
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          # 1. Decode the fixed debug keystore committed in the repository.
-          #    NEVER generate a random keystore in CI, otherwise the signature changes on every
-          #    build and overwrite-installing updates on Xiaomi 14 Pro will fail!
-          if [ ! -f "debug.keystore.base64" ]; then
-            echo "::error::Missing debug.keystore.base64 in repository root. Refusing to generate a random keystore because changing signatures breaks overwrite updates."
-            exit 1
-          fi
-          tr -d '\n\r ' < debug.keystore.base64 | base64 -d > debug.keystore
-          echo "Decoded fixed debug.keystore from debug.keystore.base64"
+          # NEVER generate a random keystore in CI, otherwise the signature changes on every
+          # build and overwrite-installing updates on Xiaomi 14 Pro will fail!
 
-          # 2. Optionally decode fixed release keystore from GitHub Secrets (never randomly generated)
+          # 1. Fixed Debug keystore: from repo file debug.keystore.base64 OR GitHub Secret DEBUG_KEYSTORE_BASE64
+          if [ -f "debug.keystore.base64" ]; then
+            tr -d '\n\r ' < debug.keystore.base64 | base64 -d > debug.keystore
+            echo "has_debug_keystore=true" >> "$GITHUB_OUTPUT"
+            echo "Decoded fixed debug.keystore from repository file debug.keystore.base64"
+          elif [ -n "$DEBUG_KEYSTORE_BASE64" ]; then
+            printf '%s' "$DEBUG_KEYSTORE_BASE64" | tr -d '\n\r ' | base64 -d > debug.keystore
+            echo "has_debug_keystore=true" >> "$GITHUB_OUTPUT"
+            echo "Decoded fixed debug.keystore from GitHub Secret DEBUG_KEYSTORE_BASE64"
+          else
+            echo "has_debug_keystore=false" >> "$GITHUB_OUTPUT"
+            echo "No fixed debug keystore found (neither debug.keystore.base64 nor DEBUG_KEYSTORE_BASE64 secret)."
+          fi
+
+          # 2. Fixed Release keystore: from GitHub Secrets KEYSTORE_BASE64 + STORE_PASSWORD + KEY_PASSWORD
           if [ -n "$KEYSTORE_BASE64" ] && [ -n "$STORE_PASSWORD" ] && [ -n "$KEY_PASSWORD" ]; then
             printf '%s' "$KEYSTORE_BASE64" | tr -d '\n\r ' | base64 -d > my-upload-key.jks
             echo "has_release_keystore=true" >> "$GITHUB_OUTPUT"
-            echo "Decoded fixed release keystore (my-upload-key.jks)"
+            echo "Decoded fixed release keystore (my-upload-key.jks) from GitHub Secrets"
           else
             echo "has_release_keystore=false" >> "$GITHUB_OUTPUT"
-            echo "Release keystore secrets not set; skipping release signing unless configured."
+            echo "Release keystore secrets not configured."
           fi
 
       - name: Determine build targets
         id: targets
         env:
           INPUT_BUILD_TYPE: ${{ github.event.inputs.build_type }}
+          HAS_DEBUG: ${{ steps.keystores.outputs.has_debug_keystore }}
           HAS_RELEASE: ${{ steps.keystores.outputs.has_release_keystore }}
           EVENT_NAME: ${{ github.event_name }}
           GITHUB_REF: ${{ github.ref }}
@@ -104,9 +114,25 @@ jobs:
           BUILD_DEBUG=false
           BUILD_RELEASE=false
 
+          if [ "$HAS_DEBUG" != "true" ] && [ "$HAS_RELEASE" != "true" ]; then
+            echo "::error::No fixed signing keystore configured! To keep the APK signature fixed for overwrite updates, add GitHub Secret DEBUG_KEYSTORE_BASE64 (copy contents of debug.keystore.base64 from AI Studio) OR add Release secrets KEYSTORE_BASE64, STORE_PASSWORD, KEY_PASSWORD (keyAlias 'upload') in Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
             case "$INPUT_BUILD_TYPE" in
+              auto)
+                if [ "$HAS_RELEASE" = "true" ]; then
+                  BUILD_RELEASE=true
+                else
+                  BUILD_DEBUG=true
+                fi
+                ;;
               debug)
+                if [ "$HAS_DEBUG" != "true" ]; then
+                  echo "::error::Debug build requires debug.keystore.base64 in repo or GitHub Secret DEBUG_KEYSTORE_BASE64."
+                  exit 1
+                fi
                 BUILD_DEBUG=true
                 ;;
               release)
@@ -117,21 +143,31 @@ jobs:
                 BUILD_RELEASE=true
                 ;;
               both)
-                BUILD_DEBUG=true
+                if [ "$HAS_DEBUG" = "true" ]; then
+                  BUILD_DEBUG=true
+                else
+                  echo "::warning::Fixed debug keystore not configured; skipping Debug APK."
+                fi
                 if [ "$HAS_RELEASE" = "true" ]; then
                   BUILD_RELEASE=true
                 else
-                  echo "::warning::Release keystore secrets are not configured; building Debug APK only."
+                  echo "::warning::Release keystore secrets not configured; skipping Release APK."
                 fi
                 ;;
             esac
           elif [[ "$GITHUB_REF" == refs/tags/v* ]]; then
-            BUILD_DEBUG=true
             if [ "$HAS_RELEASE" = "true" ]; then
               BUILD_RELEASE=true
             fi
+            if [ "$HAS_DEBUG" = "true" ]; then
+              BUILD_DEBUG=true
+            fi
           else
-            BUILD_DEBUG=true
+            if [ "$HAS_RELEASE" = "true" ]; then
+              BUILD_RELEASE=true
+            else
+              BUILD_DEBUG=true
+            fi
           fi
 
           echo "build_debug=$BUILD_DEBUG" >> "$GITHUB_OUTPUT"
