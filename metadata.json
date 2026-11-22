@@ -1,0 +1,6 @@
+{
+  "name": "GitNote",
+  "description": "极简暖纸风 GitHub 私有仓库笔记阅读与编辑客户端",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
