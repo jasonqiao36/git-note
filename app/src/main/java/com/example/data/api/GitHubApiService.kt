@@ -1,6 +1,7 @@
 package com.example.data.api
 
 import com.example.data.model.FileContentResponse
+import com.example.data.model.GitHubReleaseResponse
 import com.example.data.model.GitTreeResponse
 import com.example.data.model.PutFileRequest
 import com.example.data.model.PutFileResponse
@@ -43,4 +44,17 @@ interface GitHubApiService {
         @Path("path", encoded = true) path: String,
         @Body request: PutFileRequest
     ): Response<PutFileResponse>
+
+    @GET("repos/{owner}/{repo}/releases/latest")
+    suspend fun getLatestRelease(
+        @Path("owner") owner: String,
+        @Path("repo") repo: String
+    ): Response<GitHubReleaseResponse>
+
+    @GET("repos/{owner}/{repo}/releases")
+    suspend fun listReleases(
+        @Path("owner") owner: String,
+        @Path("repo") repo: String,
+        @Query("per_page") perPage: Int = 5
+    ): Response<List<GitHubReleaseResponse>>
 }

@@ -141,3 +141,71 @@ data class PutFileContentRef(
     val path: String,
     val sha: String
 )
+
+data class AppUpdateConfig(
+    val owner: String,
+    val repo: String,
+    val token: String = "",
+    val autoCheckOnLaunch: Boolean = true
+) {
+    val fullName: String get() = "$owner/$repo"
+}
+
+data class AppUpdateInfo(
+    val tagName: String,
+    val releaseName: String,
+    val releaseNotes: String,
+    val releaseUrl: String,
+    val publishedAt: String,
+    val apkAssetId: Long?,
+    val apkAssetName: String?,
+    val apkApiUrl: String?,
+    val apkSizeBytes: Long,
+    val isNewer: Boolean
+)
+
+sealed interface UpdateDownloadState {
+    data object Idle : UpdateDownloadState
+
+    data class Downloading(
+        val downloadedBytes: Long,
+        val totalBytes: Long
+    ) : UpdateDownloadState {
+        val progress: Float?
+            get() = if (totalBytes > 0L) {
+                (downloadedBytes.toFloat() / totalBytes.toFloat()).coerceIn(0f, 1f)
+            } else {
+                null
+            }
+    }
+
+    data class ReadyToInstall(
+        val apkFilePath: String,
+        val fileSizeBytes: Long
+    ) : UpdateDownloadState
+
+    data class Error(
+        val message: String
+    ) : UpdateDownloadState
+}
+
+@JsonClass(generateAdapter = true)
+data class GitHubReleaseResponse(
+    @Json(name = "tag_name") val tagName: String = "",
+    val name: String? = null,
+    val body: String? = null,
+    @Json(name = "html_url") val htmlUrl: String = "",
+    @Json(name = "published_at") val publishedAt: String? = null,
+    val draft: Boolean = false,
+    val prerelease: Boolean = false,
+    val assets: List<GitHubReleaseAsset> = emptyList()
+)
+
+@JsonClass(generateAdapter = true)
+data class GitHubReleaseAsset(
+    val id: Long = 0L,
+    val url: String = "",
+    val name: String = "",
+    val size: Long = 0L,
+    @Json(name = "browser_download_url") val browserDownloadUrl: String = ""
+)

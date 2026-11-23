@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.local.ConfigStore
+import com.example.data.model.AppUpdateConfig
+import com.example.data.model.AppUpdateInfo
 import com.example.data.model.BrowserTab
 import com.example.data.model.BrowserTabOrder
 import com.example.data.model.BrowserViewMode
@@ -13,9 +15,12 @@ import com.example.data.model.RepoConfig
 import com.example.data.model.RepoTreeNode
 import com.example.data.model.SaveResult
 import com.example.data.model.ThemeMode
+import com.example.data.model.UpdateDownloadState
+import com.example.data.repository.AppUpdateRepository
 import com.example.data.repository.FileNotFoundOnRemoteException
 import com.example.data.repository.GitHubNotesRepository
 import com.example.ui.screens.ancestorDirectoriesOf
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -88,7 +93,15 @@ data class GitNoteUiState(
     val isCreatingFolder: Boolean = false,
     val createError: String? = null,
     val pendingDiscardAction: PendingDiscardAction? = null,
-    val snackbarMessage: String? = null
+    val snackbarMessage: String? = null,
+
+    // App updates (GitHub Releases)
+    val appUpdateConfig: AppUpdateConfig? = null,
+    val isCheckingUpdate: Boolean = false,
+    val availableUpdate: AppUpdateInfo? = null,
+    val updateDownloadState: UpdateDownloadState = UpdateDownloadState.Idle,
+    val showUpdateConfigDialog: Boolean = false,
+    val updateConfigError: String? = null
 ) {
     val currentDirectoryEntries: List<RepoTreeNode>
         get() = allNodes.filter { node ->
@@ -118,6 +131,8 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
 
     private val configStore = ConfigStore(application.applicationContext)
     private val repository = GitHubNotesRepository()
+    private val updateRepository = AppUpdateRepository()
+    private var updateDownloadJob: Job? = null
 
     private val _uiState = MutableStateFlow(GitNoteUiState())
     val uiState: StateFlow<GitNoteUiState> = _uiState.asStateFlow()
@@ -144,6 +159,11 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
             }
         }
         viewModelScope.launch {
+            configStore.appUpdateConfigFlow.collect { updateCfg ->
+                _uiState.update { it.copy(appUpdateConfig = updateCfg) }
+            }
+        }
+        viewModelScope.launch {
             configStore.recentFilesFlow.collect { recents ->
                 _uiState.update { it.copy(recentFiles = recents) }
             }
@@ -153,6 +173,7 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
             val initialRecents = configStore.getInitialRecentFiles()
             val initialTabOrder = configStore.getInitialBrowserTabOrder()
             val initialAutoOpenLast = configStore.getInitialAutoOpenLastNote()
+            val initialUpdateConfig = configStore.getInitialAppUpdateConfig()
             val defaultTab = if (initialTabOrder == BrowserTabOrder.RECENT_FIRST) {
                 BrowserTab.RECENT
             } else {
@@ -166,7 +187,8 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
                         repoConfig = null,
                         browserTabOrder = initialTabOrder,
                         browserTab = defaultTab,
-                        autoOpenLastNote = initialAutoOpenLast
+                        autoOpenLastNote = initialAutoOpenLast,
+                        appUpdateConfig = initialUpdateConfig
                     )
                 }
             } else {
@@ -179,7 +201,8 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
                         recentFiles = initialRecents,
                         browserTabOrder = initialTabOrder,
                         browserTab = defaultTab,
-                        autoOpenLastNote = initialAutoOpenLast
+                        autoOpenLastNote = initialAutoOpenLast,
+                        appUpdateConfig = initialUpdateConfig
                     )
                 }
                 // Load full repository tree in background
@@ -187,6 +210,10 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
                 // Auto-open last viewed/edited file only when enabled in settings
                 if (initialAutoOpenLast && !lastPath.isNullOrBlank()) {
                     openFileInternal(path = lastPath, isAutoOpenOnLaunch = true)
+                }
+                // Silently check GitHub Releases if update source is configured
+                if (initialUpdateConfig != null && initialUpdateConfig.autoCheckOnLaunch) {
+                    checkForUpdates(manual = false)
                 }
             }
         }
@@ -784,6 +811,197 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun openUpdateConfigDialog() {
+        _uiState.update {
+            it.copy(
+                showUpdateConfigDialog = true,
+                updateConfigError = null
+            )
+        }
+    }
+
+    fun dismissUpdateConfigDialog() {
+        _uiState.update {
+            it.copy(
+                showUpdateConfigDialog = false,
+                updateConfigError = null
+            )
+        }
+    }
+
+    fun saveUpdateConfig(repoInput: String, tokenInput: String, autoCheck: Boolean) {
+        val parsed = updateRepository.parseRepoInput(repoInput)
+        if (parsed == null) {
+            _uiState.update { it.copy(updateConfigError = "仓库格式请填写 owner/repo，例如 yourname/gitnote") }
+            return
+        }
+        val config = AppUpdateConfig(
+            owner = parsed.first,
+            repo = parsed.second,
+            token = tokenInput.trim(),
+            autoCheckOnLaunch = autoCheck
+        )
+        viewModelScope.launch {
+            configStore.saveAppUpdateConfig(config)
+            _uiState.update {
+                it.copy(
+                    appUpdateConfig = config,
+                    showUpdateConfigDialog = false,
+                    updateConfigError = null,
+                    snackbarMessage = "已保存更新源 ${config.fullName}"
+                )
+            }
+        }
+    }
+
+    fun clearUpdateConfig() {
+        updateDownloadJob?.cancel()
+        updateDownloadJob = null
+        viewModelScope.launch {
+            configStore.clearAppUpdateConfig()
+            _uiState.update {
+                it.copy(
+                    appUpdateConfig = null,
+                    availableUpdate = null,
+                    updateDownloadState = UpdateDownloadState.Idle,
+                    showUpdateConfigDialog = false,
+                    updateConfigError = null,
+                    snackbarMessage = "已清除更新源配置"
+                )
+            }
+        }
+    }
+
+    fun checkForUpdates(manual: Boolean = true) {
+        val config = _uiState.value.appUpdateConfig
+        if (config == null) {
+            if (manual) {
+                openUpdateConfigDialog()
+            }
+            return
+        }
+        if (_uiState.value.isCheckingUpdate) return
+
+        val fallbackToken = _uiState.value.repoConfig?.token.orEmpty()
+        viewModelScope.launch {
+            _uiState.update { it.copy(isCheckingUpdate = true) }
+            val result = updateRepository.checkLatestRelease(config, fallbackToken)
+            result.fold(
+                onSuccess = { info ->
+                    if (info.isNewer || manual) {
+                        _uiState.update {
+                            it.copy(
+                                isCheckingUpdate = false,
+                                showSettingsSheet = if (info.isNewer) false else it.showSettingsSheet,
+                                availableUpdate = if (info.isNewer) info else null,
+                                updateDownloadState = if (info.isNewer) UpdateDownloadState.Idle else it.updateDownloadState,
+                                snackbarMessage = if (!info.isNewer && manual) {
+                                    "当前已是最新版本（远端最新：${info.tagName}）"
+                                } else {
+                                    null
+                                }
+                            )
+                        }
+                    } else {
+                        _uiState.update { it.copy(isCheckingUpdate = false) }
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(
+                            isCheckingUpdate = false,
+                            snackbarMessage = if (manual) (error.message ?: "检查更新失败") else null
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    fun startUpdateDownload() {
+        val state = _uiState.value
+        val config = state.appUpdateConfig ?: return
+        val updateInfo = state.availableUpdate ?: return
+        if (state.updateDownloadState is UpdateDownloadState.Downloading) return
+
+        val fallbackToken = state.repoConfig?.token.orEmpty()
+        val cacheDir = getApplication<Application>().cacheDir
+
+        updateDownloadJob?.cancel()
+        updateDownloadJob = viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    updateDownloadState = UpdateDownloadState.Downloading(
+                        downloadedBytes = 0L,
+                        totalBytes = updateInfo.apkSizeBytes
+                    )
+                )
+            }
+            val result = updateRepository.downloadApkAsset(
+                cacheDir = cacheDir,
+                config = config,
+                fallbackToken = fallbackToken,
+                updateInfo = updateInfo,
+                onProgress = { downloaded, total ->
+                    _uiState.update {
+                        it.copy(
+                            updateDownloadState = UpdateDownloadState.Downloading(
+                                downloadedBytes = downloaded,
+                                totalBytes = total
+                            )
+                        )
+                    }
+                }
+            )
+            result.fold(
+                onSuccess = { apkFile ->
+                    _uiState.update {
+                        it.copy(
+                            updateDownloadState = UpdateDownloadState.ReadyToInstall(
+                                apkFilePath = apkFile.absolutePath,
+                                fileSizeBytes = apkFile.length()
+                            )
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(
+                            updateDownloadState = UpdateDownloadState.Error(
+                                message = error.message ?: "下载安装包失败"
+                            )
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    fun cancelUpdateDownload() {
+        updateDownloadJob?.cancel()
+        updateDownloadJob = null
+        _uiState.update {
+            it.copy(updateDownloadState = UpdateDownloadState.Idle)
+        }
+    }
+
+    fun reportUpdateInstallError(message: String) {
+        _uiState.update {
+            it.copy(snackbarMessage = message)
+        }
+    }
+
+    fun dismissUpdateAvailableDialog() {
+        updateDownloadJob?.cancel()
+        updateDownloadJob = null
+        _uiState.update {
+            it.copy(
+                availableUpdate = null,
+                updateDownloadState = UpdateDownloadState.Idle
+            )
+        }
+    }
+
     fun openReconfigureSetup() {
         _uiState.update {
             it.copy(
@@ -804,6 +1022,7 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
                     autoOpenLastNote = it.autoOpenLastNote,
                     browserTabOrder = it.browserTabOrder,
                     browserViewMode = it.browserViewMode,
+                    appUpdateConfig = it.appUpdateConfig,
                     showSetupScreen = true
                 )
             }

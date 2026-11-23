@@ -40,6 +40,8 @@ import com.example.ui.components.CreateEntryDialog
 import com.example.ui.components.RecentFilesBottomSheet
 import com.example.ui.components.SettingsBottomSheet
 import com.example.ui.components.UnsavedChangesDialog
+import com.example.ui.components.UpdateAvailableDialog
+import com.example.ui.components.UpdateConfigDialog
 import com.example.ui.screens.BrowserScreen
 import com.example.ui.screens.NoteScreen
 import com.example.ui.screens.SetupScreen
@@ -125,12 +127,38 @@ fun GitNoteApp(
             themeMode = uiState.themeMode,
             browserTabOrder = uiState.browserTabOrder,
             autoOpenLastNote = uiState.autoOpenLastNote,
+            appUpdateConfig = uiState.appUpdateConfig,
+            isCheckingUpdate = uiState.isCheckingUpdate,
             onSelectTheme = viewModel::setThemeMode,
             onSelectBrowserTabOrder = viewModel::setBrowserTabOrder,
             onToggleAutoOpenLastNote = viewModel::setAutoOpenLastNote,
+            onOpenUpdateConfig = viewModel::openUpdateConfigDialog,
+            onCheckUpdates = { viewModel.checkForUpdates(manual = true) },
             onReconfigure = viewModel::openReconfigureSetup,
             onDisconnect = viewModel::disconnectRepository,
             onDismiss = { viewModel.setShowSettingsSheet(false) }
+        )
+    }
+
+    if (uiState.showUpdateConfigDialog) {
+        UpdateConfigDialog(
+            existingConfig = uiState.appUpdateConfig,
+            errorMessage = uiState.updateConfigError,
+            onSave = viewModel::saveUpdateConfig,
+            onClear = viewModel::clearUpdateConfig,
+            onDismiss = viewModel::dismissUpdateConfigDialog
+        )
+    }
+
+    val availableUpdate = uiState.availableUpdate
+    if (availableUpdate != null) {
+        UpdateAvailableDialog(
+            updateInfo = availableUpdate,
+            downloadState = uiState.updateDownloadState,
+            onStartDownload = viewModel::startUpdateDownload,
+            onCancelDownload = viewModel::cancelUpdateDownload,
+            onInstallError = viewModel::reportUpdateInstallError,
+            onDismiss = viewModel::dismissUpdateAvailableDialog
         )
     }
 

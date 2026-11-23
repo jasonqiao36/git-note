@@ -173,13 +173,28 @@ jobs:
           echo "build_debug=$BUILD_DEBUG" >> "$GITHUB_OUTPUT"
           echo "build_release=$BUILD_RELEASE" >> "$GITHUB_OUTPUT"
 
+          APP_VERSION_CODE="${GITHUB_RUN_NUMBER:-1}"
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            APP_VERSION_NAME="${GITHUB_REF#refs/tags/v}"
+          else
+            APP_VERSION_NAME="1.0.${APP_VERSION_CODE}"
+          fi
+          echo "app_version_code=$APP_VERSION_CODE" >> "$GITHUB_OUTPUT"
+          echo "app_version_name=$APP_VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "Resolved APK version: versionName=${APP_VERSION_NAME}, versionCode=${APP_VERSION_CODE}"
+
       - name: Build Debug APK
         if: steps.targets.outputs.build_debug == 'true'
+        env:
+          APP_VERSION_CODE: ${{ steps.targets.outputs.app_version_code }}
+          APP_VERSION_NAME: ${{ steps.targets.outputs.app_version_name }}
         run: gradle :app:assembleDebug --no-daemon --stacktrace
 
       - name: Build Release APK
         if: steps.targets.outputs.build_release == 'true'
         env:
+          APP_VERSION_CODE: ${{ steps.targets.outputs.app_version_code }}
+          APP_VERSION_NAME: ${{ steps.targets.outputs.app_version_name }}
           KEYSTORE_PATH: ${{ github.workspace }}/my-upload-key.jks
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}

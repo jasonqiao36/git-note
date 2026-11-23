@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.data.model.AppUpdateConfig
 import com.example.data.model.BrowserTabOrder
 import com.example.data.model.BrowserViewMode
 import com.example.data.model.RecentFileEntry
@@ -58,6 +59,24 @@ class ConfigStore(private val context: Context) {
         prefs[KEY_AUTO_OPEN_LAST_NOTE] ?: true
     }
 
+    val appUpdateConfigFlow: Flow<AppUpdateConfig?> = context.gitNoteDataStore.data.map { prefs ->
+        val owner = prefs[KEY_UPDATE_OWNER].orEmpty()
+        val repo = prefs[KEY_UPDATE_REPO].orEmpty()
+        if (owner.isBlank() || repo.isBlank()) {
+            null
+        } else {
+            val encToken = prefs[KEY_UPDATE_TOKEN_ENC].orEmpty()
+            val token = if (encToken.isBlank()) "" else TokenCrypto.decrypt(encToken)
+            val autoCheck = prefs[KEY_UPDATE_AUTO_CHECK] ?: true
+            AppUpdateConfig(
+                owner = owner,
+                repo = repo,
+                token = token,
+                autoCheckOnLaunch = autoCheck
+            )
+        }
+    }
+
     val recentFilesFlow: Flow<List<RecentFileEntry>> = context.gitNoteDataStore.data.map { prefs ->
         parseRecentList(prefs[KEY_RECENT_FILES])
     }
@@ -69,6 +88,8 @@ class ConfigStore(private val context: Context) {
     suspend fun getInitialBrowserTabOrder(): BrowserTabOrder = browserTabOrderFlow.first()
 
     suspend fun getInitialAutoOpenLastNote(): Boolean = autoOpenLastNoteFlow.first()
+
+    suspend fun getInitialAppUpdateConfig(): AppUpdateConfig? = appUpdateConfigFlow.first()
 
     suspend fun saveRepoConfig(config: RepoConfig) {
         val current = repoConfigFlow.first()
@@ -107,6 +128,29 @@ class ConfigStore(private val context: Context) {
     suspend fun setAutoOpenLastNote(enabled: Boolean) {
         context.gitNoteDataStore.edit { prefs ->
             prefs[KEY_AUTO_OPEN_LAST_NOTE] = enabled
+        }
+    }
+
+    suspend fun saveAppUpdateConfig(config: AppUpdateConfig) {
+        val encrypted = if (config.token.isBlank()) "" else TokenCrypto.encrypt(config.token)
+        context.gitNoteDataStore.edit { prefs ->
+            prefs[KEY_UPDATE_OWNER] = config.owner
+            prefs[KEY_UPDATE_REPO] = config.repo
+            if (encrypted.isBlank()) {
+                prefs.remove(KEY_UPDATE_TOKEN_ENC)
+            } else {
+                prefs[KEY_UPDATE_TOKEN_ENC] = encrypted
+            }
+            prefs[KEY_UPDATE_AUTO_CHECK] = config.autoCheckOnLaunch
+        }
+    }
+
+    suspend fun clearAppUpdateConfig() {
+        context.gitNoteDataStore.edit { prefs ->
+            prefs.remove(KEY_UPDATE_OWNER)
+            prefs.remove(KEY_UPDATE_REPO)
+            prefs.remove(KEY_UPDATE_TOKEN_ENC)
+            prefs.remove(KEY_UPDATE_AUTO_CHECK)
         }
     }
 
@@ -177,6 +221,10 @@ class ConfigStore(private val context: Context) {
         private val KEY_BROWSER_VIEW_MODE = stringPreferencesKey("browser_view_mode")
         private val KEY_BROWSER_TAB_ORDER = stringPreferencesKey("browser_tab_order")
         private val KEY_AUTO_OPEN_LAST_NOTE = booleanPreferencesKey("auto_open_last_note")
+        private val KEY_UPDATE_OWNER = stringPreferencesKey("update_repo_owner")
+        private val KEY_UPDATE_REPO = stringPreferencesKey("update_repo_name")
+        private val KEY_UPDATE_TOKEN_ENC = stringPreferencesKey("update_token_enc")
+        private val KEY_UPDATE_AUTO_CHECK = booleanPreferencesKey("update_auto_check")
         private val KEY_RECENT_FILES = stringPreferencesKey("recent_files_json")
     }
 }

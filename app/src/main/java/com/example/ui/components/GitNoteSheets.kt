@@ -25,6 +25,8 @@ import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.SyncAlt
+import androidx.compose.material.icons.outlined.SystemUpdate
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -56,7 +58,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.BuildConfig
 import com.example.R
+import com.example.data.model.AppUpdateConfig
 import com.example.data.model.BrowserTabOrder
 import com.example.data.model.RecentFileEntry
 import com.example.data.model.RepoConfig
@@ -228,9 +232,13 @@ fun SettingsBottomSheet(
     themeMode: ThemeMode,
     browserTabOrder: BrowserTabOrder,
     autoOpenLastNote: Boolean,
+    appUpdateConfig: AppUpdateConfig?,
+    isCheckingUpdate: Boolean,
     onSelectTheme: (ThemeMode) -> Unit,
     onSelectBrowserTabOrder: (BrowserTabOrder) -> Unit,
     onToggleAutoOpenLastNote: (Boolean) -> Unit,
+    onOpenUpdateConfig: () -> Unit,
+    onCheckUpdates: () -> Unit,
     onReconfigure: () -> Unit,
     onDisconnect: () -> Unit,
     onDismiss: () -> Unit
@@ -346,6 +354,101 @@ fun SettingsBottomSheet(
                         onCheckedChange = onToggleAutoOpenLastNote,
                         modifier = Modifier.testTag("settings_auto_open_last_switch")
                     )
+                }
+            }
+
+            HorizontalDivider(color = colorScheme.outlineVariant)
+
+            // App updates (GitHub Releases — private repo token supported)
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    text = stringResource(R.string.update_section_title),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colorScheme.onSurfaceVariant
+                )
+                Surface(
+                    color = colorScheme.surfaceContainerLow,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, colorScheme.outlineVariant, RoundedCornerShape(14.dp))
+                ) {
+                    Column(
+                        modifier = Modifier.padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "${stringResource(R.string.update_current_version)}：v${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = colorScheme.onSurface
+                        )
+                        Text(
+                            text = appUpdateConfig?.let { cfg ->
+                                val mode = if (cfg.autoCheckOnLaunch) "启动自动检查" else "仅手动检查"
+                                "${cfg.fullName} · $mode"
+                            } ?: stringResource(R.string.update_not_configured),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onOpenUpdateConfig,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                            .testTag("settings_update_config_button")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Tune,
+                            contentDescription = null,
+                            modifier = Modifier.size(17.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(R.string.update_config_button),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    Button(
+                        onClick = onCheckUpdates,
+                        enabled = !isCheckingUpdate,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                            .testTag("settings_update_check_button")
+                    ) {
+                        if (isCheckingUpdate) {
+                            CircularProgressIndicator(
+                                strokeWidth = 2.dp,
+                                color = colorScheme.onPrimary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(stringResource(R.string.update_checking))
+                        } else {
+                            Icon(
+                                imageVector = Icons.Outlined.SystemUpdate,
+                                contentDescription = null,
+                                modifier = Modifier.size(17.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = stringResource(R.string.update_check_button),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
                 }
             }
 
