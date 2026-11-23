@@ -55,6 +55,7 @@ private sealed interface MdBlock {
     data class BulletItem(val indent: Int, val text: String) : MdBlock
     data class OrderedItem(val indent: Int, val number: String, val text: String) : MdBlock
     data class TaskItem(val indent: Int, val lineIndex: Int, val checked: Boolean, val text: String) : MdBlock
+    data class Table(val data: MarkdownTableData) : MdBlock
     data object HorizontalRule : MdBlock
 }
 
@@ -96,6 +97,11 @@ fun MarkdownPreview(
                     codeBg = paperColors.codeBackground,
                     linkColor = colorScheme.primary,
                     onToggle = { onToggleTaskLine(block.lineIndex) }
+                )
+                is MdBlock.Table -> MarkdownTableView(
+                    table = block.data,
+                    codeBg = paperColors.codeBackground,
+                    linkColor = colorScheme.primary
                 )
                 is MdBlock.HorizontalRule -> HorizontalDivider(
                     modifier = Modifier.padding(vertical = 8.dp),
@@ -316,7 +322,7 @@ private fun TaskItemView(
 
 @Suppress("DEPRECATION")
 @Composable
-private fun RichMarkdownText(
+internal fun RichMarkdownText(
     text: String,
     style: TextStyle,
     codeBg: Color,
@@ -428,6 +434,14 @@ private fun parseMarkdownBlocks(markdown: String): List<MdBlock> {
             continue
         }
 
+        // GFM Table
+        val parsedTable = parseMarkdownTable(lines, i)
+        if (parsedTable != null) {
+            blocks.add(MdBlock.Table(parsedTable.table))
+            i = parsedTable.nextIndex
+            continue
+        }
+
         // Paragraph (group consecutive plain lines)
         val paraLines = mutableListOf(rawLine)
         i++
@@ -440,7 +454,8 @@ private fun parseMarkdownBlocks(markdown: String): List<MdBlock> {
                 nextTrim.startsWith(">") ||
                 nextTrim.matches(Regex("^(-{3,}|\\*{3,}|_{3,})$")) ||
                 Regex("^(\\s*)[-*+]\\s+.*$").matches(next) ||
-                Regex("^(\\s*)\\d+\\.\\s+.*$").matches(next)
+                Regex("^(\\s*)\\d+\\.\\s+.*$").matches(next) ||
+                isTableStart(lines, i)
             ) {
                 break
             }
