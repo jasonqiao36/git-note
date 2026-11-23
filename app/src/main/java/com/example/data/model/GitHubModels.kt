@@ -9,6 +9,21 @@ enum class ThemeMode {
     DARK
 }
 
+enum class BrowserViewMode {
+    FOLDER,
+    TREE
+}
+
+enum class BrowserTab {
+    FILES,
+    RECENT
+}
+
+enum class RecentFilter {
+    ALL,
+    EDITED
+}
+
 data class RepoConfig(
     val owner: String,
     val repo: String,
@@ -38,7 +53,8 @@ data class RepoTreeNode(
 data class RecentFileEntry(
     val path: String,
     val lastOpenedAt: Long,
-    val wasEdited: Boolean = false
+    val wasEdited: Boolean = false,
+    val isPinned: Boolean = false
 ) {
     val fileName: String get() = path.substringAfterLast('/')
     val parentDir: String get() = if ('/' in path) path.substringBeforeLast('/') else ""

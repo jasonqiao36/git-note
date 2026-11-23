@@ -1,7 +1,11 @@
 package com.example.ui.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,15 +23,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.AccountTree
 import androidx.compose.material.icons.outlined.CreateNewFolder
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Folder
@@ -37,6 +40,7 @@ import androidx.compose.material.icons.outlined.NoteAdd
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.DropdownMenu
@@ -48,6 +52,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -71,25 +78,39 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.R
+import com.example.data.model.BrowserTab
+import com.example.data.model.BrowserViewMode
 import com.example.data.model.RecentFileEntry
+import com.example.data.model.RecentFilter
 import com.example.data.model.RepoConfig
 import com.example.data.model.RepoTreeNode
-import com.example.ui.theme.LocalPaperColors
 import com.example.ui.viewmodel.CreateDialogType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BrowserScreen(
     repoConfig: RepoConfig,
+    allNodes: List<RepoTreeNode>,
     currentDirectory: String,
     entries: List<RepoTreeNode>,
+    browserTab: BrowserTab,
+    browserViewMode: BrowserViewMode,
+    expandedDirectories: Set<String>,
     recentFiles: List<RecentFileEntry>,
+    recentFilter: RecentFilter,
     activeNotePath: String?,
     isLoadingTree: Boolean,
     treeError: String?,
     isSearchActive: Boolean,
     searchQuery: String,
     searchResults: List<RepoTreeNode>,
+    onSelectBrowserTab: (BrowserTab) -> Unit,
+    onToggleBrowserViewMode: () -> Unit,
+    onToggleExpandDirectory: (String) -> Unit,
+    onCollapseAllDirectories: () -> Unit,
+    onExpandTopLevelDirectories: () -> Unit,
+    onRecentFilterChange: (RecentFilter) -> Unit,
+    onTogglePinRecent: (String) -> Unit,
     onNavigateDirectory: (String) -> Unit,
     onNavigateUp: () -> Boolean,
     onOpenFile: (String) -> Unit,
@@ -97,18 +118,21 @@ fun BrowserScreen(
     onSetSearchActive: (Boolean) -> Unit,
     onSearchQueryChange: (String) -> Unit,
     onOpenCreateDialog: (CreateDialogType) -> Unit,
-    onOpenRecentSheet: () -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val colorScheme = MaterialTheme.colorScheme
     var showFabMenu by remember { mutableStateOf(false) }
 
-    BackHandler(enabled = isSearchActive || currentDirectory.isNotEmpty()) {
-        if (isSearchActive) {
-            onSetSearchActive(false)
-        } else {
-            onNavigateUp()
+    val canNavigateUpFolder = browserTab == BrowserTab.FILES &&
+        browserViewMode == BrowserViewMode.FOLDER &&
+        currentDirectory.isNotEmpty()
+
+    BackHandler(enabled = isSearchActive || browserTab == BrowserTab.RECENT || canNavigateUpFolder) {
+        when {
+            isSearchActive -> onSetSearchActive(false)
+            browserTab == BrowserTab.RECENT -> onSelectBrowserTab(BrowserTab.FILES)
+            canNavigateUpFolder -> onNavigateUp()
         }
     }
 
@@ -129,7 +153,7 @@ fun BrowserScreen(
                         titleContentColor = colorScheme.onBackground
                     ),
                     navigationIcon = {
-                        if (currentDirectory.isNotEmpty()) {
+                        if (canNavigateUpFolder) {
                             IconButton(
                                 onClick = { onNavigateUp() },
                                 modifier = Modifier.testTag("browser_up_button")
@@ -144,10 +168,10 @@ fun BrowserScreen(
                     title = {
                         Column {
                             Text(
-                                text = if (currentDirectory.isEmpty()) {
-                                    repoConfig.repo
-                                } else {
+                                text = if (canNavigateUpFolder) {
                                     currentDirectory.substringAfterLast('/')
+                                } else {
+                                    repoConfig.repo
                                 },
                                 style = MaterialTheme.typography.titleLarge,
                                 maxLines = 1,
@@ -163,6 +187,22 @@ fun BrowserScreen(
                         }
                     },
                     actions = {
+                        if (browserTab == BrowserTab.FILES) {
+                            IconButton(
+                                onClick = onToggleBrowserViewMode,
+                                modifier = Modifier.testTag("browser_view_mode_toggle")
+                            ) {
+                                val isTree = browserViewMode == BrowserViewMode.TREE
+                                Icon(
+                                    imageVector = if (isTree) Icons.Outlined.ViewAgenda else Icons.Outlined.AccountTree,
+                                    contentDescription = stringResource(
+                                        if (isTree) R.string.browser_mode_switch_to_folder
+                                        else R.string.browser_mode_switch_to_tree
+                                    ),
+                                    tint = if (isTree) colorScheme.primary else colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                         IconButton(
                             onClick = { onSetSearchActive(true) },
                             modifier = Modifier.testTag("browser_search_button")
@@ -195,7 +235,7 @@ fun BrowserScreen(
             }
         },
         floatingActionButton = {
-            if (!isSearchActive) {
+            if (!isSearchActive && browserTab == BrowserTab.FILES) {
                 Box {
                     FloatingActionButton(
                         onClick = { showFabMenu = true },
@@ -254,81 +294,218 @@ fun BrowserScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Breadcrumbs when inside a subdirectory
-            AnimatedVisibility(visible = !isSearchActive && currentDirectory.isNotEmpty()) {
+            // Top segmented switcher: 「目录」 / 「最近」
+            AnimatedVisibility(visible = !isSearchActive) {
+                BrowserTopSegmentedBar(
+                    selectedTab = browserTab,
+                    viewMode = browserViewMode,
+                    recentCount = recentFiles.size,
+                    onSelectTab = onSelectBrowserTab
+                )
+            }
+
+            // Breadcrumbs only in single-level folder mode when inside a subdirectory
+            AnimatedVisibility(visible = !isSearchActive && canNavigateUpFolder) {
                 BreadcrumbBar(
                     currentDirectory = currentDirectory,
                     onNavigateDirectory = onNavigateDirectory
                 )
             }
 
-            PullToRefreshBox(
-                isRefreshing = isLoadingTree && entries.isNotEmpty(),
-                onRefresh = onRefresh,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                when {
-                    isLoadingTree && entries.isEmpty() && !isSearchActive -> {
-                        LoadingSkeletonList()
-                    }
-                    treeError != null && entries.isEmpty() && !isSearchActive -> {
-                        ErrorStateView(message = treeError, onRetry = onRefresh)
-                    }
-                    isSearchActive -> {
-                        SearchResultsList(
-                            query = searchQuery,
-                            results = searchResults,
-                            activeNotePath = activeNotePath,
-                            onOpenFile = onOpenFile
-                        )
-                    }
-                    else -> {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(
-                                start = 16.dp,
-                                end = 16.dp,
-                                top = 8.dp,
-                                bottom = 96.dp
-                            ),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            if (currentDirectory.isEmpty() && recentFiles.isNotEmpty()) {
-                                item(key = "recent_section") {
-                                    RecentFilesSection(
-                                        recentFiles = recentFiles,
-                                        activeNotePath = activeNotePath,
-                                        onOpenFile = onOpenFile,
-                                        onShowAll = onOpenRecentSheet
-                                    )
-                                }
-                            }
-
-                            if (entries.isEmpty()) {
-                                item(key = "empty_folder") {
-                                    EmptyFolderView(
-                                        onCreateNote = { onOpenCreateDialog(CreateDialogType.NOTE) }
-                                    )
-                                }
-                            } else {
-                                items(entries, key = { it.path }) { node ->
-                                    TreeNodeRow(
-                                        node = node,
-                                        isSelected = !node.isDirectory && node.path == activeNotePath,
-                                        showRelativePath = false,
-                                        onClick = {
-                                            if (node.isDirectory) {
-                                                onNavigateDirectory(node.path)
-                                            } else {
-                                                onOpenFile(node.path)
-                                            }
-                                        }
-                                    )
+            if (isSearchActive) {
+                SearchResultsList(
+                    query = searchQuery,
+                    results = searchResults,
+                    activeNotePath = activeNotePath,
+                    onOpenFile = onOpenFile
+                )
+            } else {
+                AnimatedContent(
+                    targetState = browserTab,
+                    transitionSpec = { fadeIn() togetherWith fadeOut() },
+                    label = "browser_tab_transition",
+                    modifier = Modifier.fillMaxSize()
+                ) { activeTab ->
+                    when (activeTab) {
+                        BrowserTab.FILES -> {
+                            PullToRefreshBox(
+                                isRefreshing = isLoadingTree && allNodes.isNotEmpty(),
+                                onRefresh = onRefresh,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                when {
+                                    isLoadingTree && allNodes.isEmpty() -> {
+                                        LoadingSkeletonList()
+                                    }
+                                    treeError != null && allNodes.isEmpty() -> {
+                                        ErrorStateView(message = treeError, onRetry = onRefresh)
+                                    }
+                                    browserViewMode == BrowserViewMode.TREE -> {
+                                        BrowserTreeView(
+                                            allNodes = allNodes,
+                                            expandedDirectories = expandedDirectories,
+                                            currentDirectory = currentDirectory,
+                                            activeNotePath = activeNotePath,
+                                            onToggleDirectory = onToggleExpandDirectory,
+                                            onCollapseAll = onCollapseAllDirectories,
+                                            onExpandTopLevel = onExpandTopLevelDirectories,
+                                            onOpenFile = onOpenFile,
+                                            onCreateNote = { onOpenCreateDialog(CreateDialogType.NOTE) }
+                                        )
+                                    }
+                                    else -> {
+                                        FolderEntriesList(
+                                            entries = entries,
+                                            activeNotePath = activeNotePath,
+                                            onNavigateDirectory = onNavigateDirectory,
+                                            onOpenFile = onOpenFile,
+                                            onCreateNote = { onOpenCreateDialog(CreateDialogType.NOTE) }
+                                        )
+                                    }
                                 }
                             }
                         }
+
+                        BrowserTab.RECENT -> {
+                            RecentTabView(
+                                recentFiles = recentFiles,
+                                filter = recentFilter,
+                                activeNotePath = activeNotePath,
+                                onFilterChange = onRecentFilterChange,
+                                onOpenFile = onOpenFile,
+                                onTogglePin = onTogglePinRecent
+                            )
+                        }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BrowserTopSegmentedBar(
+    selectedTab: BrowserTab,
+    viewMode: BrowserViewMode,
+    recentCount: Int,
+    onSelectTab: (BrowserTab) -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    val filesLabel = if (viewMode == BrowserViewMode.TREE) {
+        "${stringResource(R.string.browser_tab_files)} · ${stringResource(R.string.browser_mode_tree_label)}"
+    } else {
+        stringResource(R.string.browser_tab_files)
+    }
+    val recentLabel = if (recentCount > 0) {
+        "${stringResource(R.string.browser_tab_recent)} ($recentCount)"
+    } else {
+        stringResource(R.string.browser_tab_recent)
+    }
+
+    SingleChoiceSegmentedButtonRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .testTag("browser_top_segmented_bar")
+    ) {
+        SegmentedButton(
+            selected = selectedTab == BrowserTab.FILES,
+            onClick = { onSelectTab(BrowserTab.FILES) },
+            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+            colors = SegmentedButtonDefaults.colors(
+                activeContainerColor = colorScheme.primaryContainer,
+                activeContentColor = colorScheme.onPrimaryContainer,
+                inactiveContainerColor = colorScheme.surfaceContainerLowest,
+                inactiveContentColor = colorScheme.onSurfaceVariant,
+                activeBorderColor = colorScheme.primary.copy(alpha = 0.55f),
+                inactiveBorderColor = colorScheme.outlineVariant
+            ),
+            icon = {
+                Icon(
+                    imageVector = if (viewMode == BrowserViewMode.TREE) Icons.Outlined.AccountTree else Icons.Outlined.Folder,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+            },
+            modifier = Modifier.testTag("browser_tab_files")
+        ) {
+            Text(
+                text = filesLabel,
+                style = MaterialTheme.typography.labelLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        SegmentedButton(
+            selected = selectedTab == BrowserTab.RECENT,
+            onClick = { onSelectTab(BrowserTab.RECENT) },
+            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+            colors = SegmentedButtonDefaults.colors(
+                activeContainerColor = colorScheme.primaryContainer,
+                activeContentColor = colorScheme.onPrimaryContainer,
+                inactiveContainerColor = colorScheme.surfaceContainerLowest,
+                inactiveContentColor = colorScheme.onSurfaceVariant,
+                activeBorderColor = colorScheme.primary.copy(alpha = 0.55f),
+                inactiveBorderColor = colorScheme.outlineVariant
+            ),
+            icon = {
+                Icon(
+                    imageVector = Icons.Outlined.History,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+            },
+            modifier = Modifier.testTag("browser_tab_recent")
+        ) {
+            Text(
+                text = recentLabel,
+                style = MaterialTheme.typography.labelLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+private fun FolderEntriesList(
+    entries: List<RepoTreeNode>,
+    activeNotePath: String?,
+    onNavigateDirectory: (String) -> Unit,
+    onOpenFile: (String) -> Unit,
+    onCreateNote: () -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag("browser_folder_list"),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 6.dp,
+            bottom = 96.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        if (entries.isEmpty()) {
+            item(key = "empty_folder") {
+                EmptyFolderView(onCreateNote = onCreateNote)
+            }
+        } else {
+            items(entries, key = { it.path }) { node ->
+                TreeNodeRow(
+                    node = node,
+                    isSelected = !node.isDirectory && node.path == activeNotePath,
+                    showRelativePath = false,
+                    onClick = {
+                        if (node.isDirectory) {
+                            onNavigateDirectory(node.path)
+                        } else {
+                            onOpenFile(node.path)
+                        }
+                    }
+                )
             }
         }
     }
@@ -453,121 +630,6 @@ private fun BreadcrumbBar(
                     .clickable(enabled = !isLast) { onNavigateDirectory(targetPath) }
                     .padding(horizontal = 6.dp, vertical = 4.dp)
             )
-        }
-    }
-}
-
-@Composable
-private fun RecentFilesSection(
-    recentFiles: List<RecentFileEntry>,
-    activeNotePath: String?,
-    onOpenFile: (String) -> Unit,
-    onShowAll: () -> Unit
-) {
-    val colorScheme = MaterialTheme.colorScheme
-    val paperColors = LocalPaperColors.current
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.History,
-                contentDescription = null,
-                tint = colorScheme.primary,
-                modifier = Modifier.size(16.dp)
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(
-                text = stringResource(R.string.browser_recent_title),
-                style = MaterialTheme.typography.labelLarge,
-                color = colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                text = stringResource(R.string.browser_recent_all),
-                style = MaterialTheme.typography.labelMedium,
-                color = colorScheme.primary,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable(onClick = onShowAll)
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                    .testTag("browser_recent_all_button")
-            )
-        }
-
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            items(recentFiles.take(6), key = { "recent_${it.path}" }) { entry ->
-                val isSelected = entry.path == activeNotePath
-                Surface(
-                    color = if (isSelected) colorScheme.primaryContainer else colorScheme.surfaceContainerLowest,
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier
-                        .width(156.dp)
-                        .border(
-                            width = 1.dp,
-                            color = if (isSelected) colorScheme.primary else colorScheme.outlineVariant,
-                            shape = RoundedCornerShape(14.dp)
-                        )
-                        .clip(RoundedCornerShape(14.dp))
-                        .clickable { onOpenFile(entry.path) }
-                        .testTag("recent_chip_${entry.fileName}")
-                ) {
-                    Column(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Description,
-                                contentDescription = null,
-                                tint = colorScheme.primary,
-                                modifier = Modifier.size(15.dp)
-                            )
-                            Text(
-                                text = entry.fileName.removeSuffix(".md"),
-                                style = MaterialTheme.typography.titleSmall,
-                                color = colorScheme.onSurface,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text(
-                                text = entry.parentDir.ifEmpty { stringResource(R.string.browser_root) },
-                                style = MaterialTheme.typography.labelSmall,
-                                color = colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f)
-                            )
-                            if (entry.wasEdited) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(6.dp)
-                                        .clip(CircleShape)
-                                        .background(paperColors.quoteBar)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 }
@@ -716,7 +778,7 @@ private fun SearchResultsList(
 }
 
 @Composable
-private fun EmptyFolderView(onCreateNote: () -> Unit) {
+internal fun EmptyFolderView(onCreateNote: () -> Unit) {
     val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier

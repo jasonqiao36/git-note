@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.data.model.BrowserViewMode
 import com.example.data.model.RecentFileEntry
 import com.example.data.model.RepoConfig
 import com.example.data.model.ThemeMode
@@ -41,6 +42,11 @@ class ConfigStore(private val context: Context) {
         ThemeMode.entries.firstOrNull { it.name == raw } ?: ThemeMode.SYSTEM
     }
 
+    val browserViewModeFlow: Flow<BrowserViewMode> = context.gitNoteDataStore.data.map { prefs ->
+        val raw = prefs[KEY_BROWSER_VIEW_MODE]
+        BrowserViewMode.entries.firstOrNull { it.name == raw } ?: BrowserViewMode.FOLDER
+    }
+
     val recentFilesFlow: Flow<List<RecentFileEntry>> = context.gitNoteDataStore.data.map { prefs ->
         parseRecentList(prefs[KEY_RECENT_FILES])
     }
@@ -71,6 +77,12 @@ class ConfigStore(private val context: Context) {
         }
     }
 
+    suspend fun setBrowserViewMode(mode: BrowserViewMode) {
+        context.gitNoteDataStore.edit { prefs ->
+            prefs[KEY_BROWSER_VIEW_MODE] = mode.name
+        }
+    }
+
     suspend fun recordRecentFile(path: String, wasEdited: Boolean) {
         val normalized = path.trim('/')
         if (normalized.isEmpty()) return
@@ -80,11 +92,27 @@ class ConfigStore(private val context: Context) {
             val updatedEntry = RecentFileEntry(
                 path = normalized,
                 lastOpenedAt = System.currentTimeMillis(),
-                wasEdited = wasEdited || (existing?.wasEdited == true)
+                wasEdited = wasEdited || (existing?.wasEdited == true),
+                isPinned = existing?.isPinned == true
             )
-            val updatedList = (listOf(updatedEntry) + current.filterNot { it.path == normalized })
-                .take(MAX_RECENT_FILES)
+            val merged = listOf(updatedEntry) + current.filterNot { it.path == normalized }
+            val pinned = merged.filter { it.isPinned }
+            val unpinned = merged.filterNot { it.isPinned }
+                .take((MAX_RECENT_FILES - pinned.size).coerceAtLeast(0))
+            val updatedList = (pinned + unpinned).sortedByDescending { it.lastOpenedAt }
             prefs[KEY_RECENT_FILES] = recentListAdapter.toJson(updatedList)
+        }
+    }
+
+    suspend fun togglePinRecentFile(path: String) {
+        val normalized = path.trim('/')
+        if (normalized.isEmpty()) return
+        context.gitNoteDataStore.edit { prefs ->
+            val current = parseRecentList(prefs[KEY_RECENT_FILES])
+            val updated = current.map { entry ->
+                if (entry.path == normalized) entry.copy(isPinned = !entry.isPinned) else entry
+            }
+            prefs[KEY_RECENT_FILES] = recentListAdapter.toJson(updated)
         }
     }
 
@@ -113,12 +141,13 @@ class ConfigStore(private val context: Context) {
     }
 
     companion object {
-        private const val MAX_RECENT_FILES = 15
+        private const val MAX_RECENT_FILES = 30
         private val KEY_OWNER = stringPreferencesKey("repo_owner")
         private val KEY_REPO = stringPreferencesKey("repo_name")
         private val KEY_BRANCH = stringPreferencesKey("repo_branch")
         private val KEY_TOKEN_ENC = stringPreferencesKey("repo_token_enc")
         private val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
+        private val KEY_BROWSER_VIEW_MODE = stringPreferencesKey("browser_view_mode")
         private val KEY_RECENT_FILES = stringPreferencesKey("recent_files_json")
     }
 }

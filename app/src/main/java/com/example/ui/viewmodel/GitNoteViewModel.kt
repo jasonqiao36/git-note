@@ -4,13 +4,17 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.local.ConfigStore
+import com.example.data.model.BrowserTab
+import com.example.data.model.BrowserViewMode
 import com.example.data.model.RecentFileEntry
+import com.example.data.model.RecentFilter
 import com.example.data.model.RepoConfig
 import com.example.data.model.RepoTreeNode
 import com.example.data.model.SaveResult
 import com.example.data.model.ThemeMode
 import com.example.data.repository.FileNotFoundOnRemoteException
 import com.example.data.repository.GitHubNotesRepository
+import com.example.ui.screens.ancestorDirectoriesOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -63,6 +67,10 @@ data class GitNoteUiState(
     val isLoadingTree: Boolean = false,
     val treeError: String? = null,
     val currentDirectory: String = "",
+    val browserTab: BrowserTab = BrowserTab.FILES,
+    val browserViewMode: BrowserViewMode = BrowserViewMode.FOLDER,
+    val expandedDirectories: Set<String> = emptySet(),
+    val recentFilter: RecentFilter = RecentFilter.ALL,
     val isSearchActive: Boolean = false,
     val searchQuery: String = "",
 
@@ -118,6 +126,11 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
             }
         }
         viewModelScope.launch {
+            configStore.browserViewModeFlow.collect { viewMode ->
+                _uiState.update { it.copy(browserViewMode = viewMode) }
+            }
+        }
+        viewModelScope.launch {
             configStore.recentFilesFlow.collect { recents ->
                 _uiState.update { it.copy(recentFiles = recents) }
             }
@@ -167,6 +180,8 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
                             repoConfig = config,
                             showSetupScreen = false,
                             currentDirectory = "",
+                            expandedDirectories = emptySet(),
+                            browserTab = BrowserTab.FILES,
                             isSearchActive = false,
                             searchQuery = "",
                             openNote = null,
@@ -226,9 +241,11 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun navigateToDirectory(path: String) {
+        val clean = path.trim('/')
         _uiState.update {
             it.copy(
-                currentDirectory = path.trim('/'),
+                currentDirectory = clean,
+                expandedDirectories = it.expandedDirectories + ancestorDirectoriesOf(clean),
                 isSearchActive = false,
                 searchQuery = ""
             )
@@ -241,6 +258,100 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
         val parent = if ('/' in current) current.substringBeforeLast('/') else ""
         _uiState.update { it.copy(currentDirectory = parent) }
         return true
+    }
+
+    fun selectBrowserTab(tab: BrowserTab) {
+        _uiState.update {
+            it.copy(
+                browserTab = tab,
+                isSearchActive = false,
+                searchQuery = ""
+            )
+        }
+    }
+
+    fun toggleBrowserViewMode() {
+        val nextMode = if (_uiState.value.browserViewMode == BrowserViewMode.FOLDER) {
+            BrowserViewMode.TREE
+        } else {
+            BrowserViewMode.FOLDER
+        }
+        _uiState.update { state ->
+            val syncedExpanded = if (nextMode == BrowserViewMode.TREE) {
+                val activeDirAncestors = ancestorDirectoriesOf(state.currentDirectory)
+                val activeNoteAncestors = state.openNote?.parentDir
+                    ?.takeIf { it.isNotEmpty() }
+                    ?.let { ancestorDirectoriesOf(it) }
+                    .orEmpty()
+                state.expandedDirectories + activeDirAncestors + activeNoteAncestors
+            } else {
+                state.expandedDirectories
+            }
+            state.copy(
+                browserViewMode = nextMode,
+                expandedDirectories = syncedExpanded
+            )
+        }
+        viewModelScope.launch {
+            configStore.setBrowserViewMode(nextMode)
+        }
+    }
+
+    fun toggleExpandDirectory(path: String) {
+        val clean = path.trim('/')
+        if (clean.isEmpty()) return
+        _uiState.update { state ->
+            val isCurrentlyExpanded = clean in state.expandedDirectories
+            val updatedExpanded = if (isCurrentlyExpanded) {
+                // Collapse this directory and any expanded descendants for clean visual feedback
+                state.expandedDirectories.filterNot { it == clean || it.startsWith("$clean/") }.toSet()
+            } else {
+                state.expandedDirectories + ancestorDirectoriesOf(clean)
+            }
+            val updatedCurrentDir = if (isCurrentlyExpanded) {
+                if (state.currentDirectory == clean || state.currentDirectory.startsWith("$clean/")) {
+                    if ('/' in clean) clean.substringBeforeLast('/') else ""
+                } else {
+                    state.currentDirectory
+                }
+            } else {
+                clean
+            }
+            state.copy(
+                expandedDirectories = updatedExpanded,
+                currentDirectory = updatedCurrentDir
+            )
+        }
+    }
+
+    fun collapseAllDirectories() {
+        _uiState.update {
+            it.copy(
+                expandedDirectories = emptySet(),
+                currentDirectory = ""
+            )
+        }
+    }
+
+    fun expandTopLevelDirectories() {
+        _uiState.update { state ->
+            val topDirs = state.allNodes
+                .asSequence()
+                .filter { it.isDirectory && it.parentPath.isEmpty() }
+                .map { it.path }
+                .toSet()
+            state.copy(expandedDirectories = topDirs)
+        }
+    }
+
+    fun setRecentFilter(filter: RecentFilter) {
+        _uiState.update { it.copy(recentFilter = filter) }
+    }
+
+    fun togglePinRecentFile(path: String) {
+        viewModelScope.launch {
+            configStore.togglePinRecentFile(path)
+        }
     }
 
     fun setSearchActive(active: Boolean) {
