@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.data.model.BrowserTabOrder
 import com.example.data.model.BrowserViewMode
 import com.example.data.model.RecentFileEntry
 import com.example.data.model.RepoConfig
@@ -47,6 +48,11 @@ class ConfigStore(private val context: Context) {
         BrowserViewMode.entries.firstOrNull { it.name == raw } ?: BrowserViewMode.FOLDER
     }
 
+    val browserTabOrderFlow: Flow<BrowserTabOrder> = context.gitNoteDataStore.data.map { prefs ->
+        val raw = prefs[KEY_BROWSER_TAB_ORDER]
+        BrowserTabOrder.entries.firstOrNull { it.name == raw } ?: BrowserTabOrder.FILES_FIRST
+    }
+
     val recentFilesFlow: Flow<List<RecentFileEntry>> = context.gitNoteDataStore.data.map { prefs ->
         parseRecentList(prefs[KEY_RECENT_FILES])
     }
@@ -54,6 +60,8 @@ class ConfigStore(private val context: Context) {
     suspend fun getInitialRepoConfig(): RepoConfig? = repoConfigFlow.first()
 
     suspend fun getInitialRecentFiles(): List<RecentFileEntry> = recentFilesFlow.first()
+
+    suspend fun getInitialBrowserTabOrder(): BrowserTabOrder = browserTabOrderFlow.first()
 
     suspend fun saveRepoConfig(config: RepoConfig) {
         val current = repoConfigFlow.first()
@@ -80,6 +88,12 @@ class ConfigStore(private val context: Context) {
     suspend fun setBrowserViewMode(mode: BrowserViewMode) {
         context.gitNoteDataStore.edit { prefs ->
             prefs[KEY_BROWSER_VIEW_MODE] = mode.name
+        }
+    }
+
+    suspend fun setBrowserTabOrder(order: BrowserTabOrder) {
+        context.gitNoteDataStore.edit { prefs ->
+            prefs[KEY_BROWSER_TAB_ORDER] = order.name
         }
     }
 
@@ -148,6 +162,7 @@ class ConfigStore(private val context: Context) {
         private val KEY_TOKEN_ENC = stringPreferencesKey("repo_token_enc")
         private val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
         private val KEY_BROWSER_VIEW_MODE = stringPreferencesKey("browser_view_mode")
+        private val KEY_BROWSER_TAB_ORDER = stringPreferencesKey("browser_tab_order")
         private val KEY_RECENT_FILES = stringPreferencesKey("recent_files_json")
     }
 }

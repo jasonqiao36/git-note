@@ -19,6 +19,11 @@ enum class BrowserTab {
     RECENT
 }
 
+enum class BrowserTabOrder {
+    FILES_FIRST,
+    RECENT_FIRST
+}
+
 enum class RecentFilter {
     ALL,
     EDITED

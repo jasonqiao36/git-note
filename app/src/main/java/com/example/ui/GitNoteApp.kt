@@ -123,7 +123,9 @@ fun GitNoteApp(
         SettingsBottomSheet(
             repoConfig = repoConfig,
             themeMode = uiState.themeMode,
+            browserTabOrder = uiState.browserTabOrder,
             onSelectTheme = viewModel::setThemeMode,
+            onSelectBrowserTabOrder = viewModel::setBrowserTabOrder,
             onReconfigure = viewModel::openReconfigureSetup,
             onDisconnect = viewModel::disconnectRepository,
             onDismiss = { viewModel.setShowSettingsSheet(false) }
@@ -183,6 +185,7 @@ private fun MainWorkspace(
                     currentDirectory = uiState.currentDirectory,
                     entries = uiState.currentDirectoryEntries,
                     browserTab = uiState.browserTab,
+                    browserTabOrder = uiState.browserTabOrder,
                     browserViewMode = uiState.browserViewMode,
                     expandedDirectories = uiState.expandedDirectories,
                     recentFiles = uiState.recentFiles,
@@ -271,6 +274,7 @@ private fun MainWorkspace(
                         currentDirectory = uiState.currentDirectory,
                         entries = uiState.currentDirectoryEntries,
                         browserTab = uiState.browserTab,
+                        browserTabOrder = uiState.browserTabOrder,
                         browserViewMode = uiState.browserViewMode,
                         expandedDirectories = uiState.expandedDirectories,
                         recentFiles = uiState.recentFiles,

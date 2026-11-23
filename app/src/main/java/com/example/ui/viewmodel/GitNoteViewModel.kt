@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.local.ConfigStore
 import com.example.data.model.BrowserTab
+import com.example.data.model.BrowserTabOrder
 import com.example.data.model.BrowserViewMode
 import com.example.data.model.RecentFileEntry
 import com.example.data.model.RecentFilter
@@ -68,6 +69,7 @@ data class GitNoteUiState(
     val treeError: String? = null,
     val currentDirectory: String = "",
     val browserTab: BrowserTab = BrowserTab.FILES,
+    val browserTabOrder: BrowserTabOrder = BrowserTabOrder.FILES_FIRST,
     val browserViewMode: BrowserViewMode = BrowserViewMode.FOLDER,
     val expandedDirectories: Set<String> = emptySet(),
     val recentFilter: RecentFilter = RecentFilter.ALL,
@@ -131,6 +133,11 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
             }
         }
         viewModelScope.launch {
+            configStore.browserTabOrderFlow.collect { tabOrder ->
+                _uiState.update { it.copy(browserTabOrder = tabOrder) }
+            }
+        }
+        viewModelScope.launch {
             configStore.recentFilesFlow.collect { recents ->
                 _uiState.update { it.copy(recentFiles = recents) }
             }
@@ -138,12 +145,20 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             val initialConfig = configStore.getInitialRepoConfig()
             val initialRecents = configStore.getInitialRecentFiles()
+            val initialTabOrder = configStore.getInitialBrowserTabOrder()
+            val defaultTab = if (initialTabOrder == BrowserTabOrder.RECENT_FIRST) {
+                BrowserTab.RECENT
+            } else {
+                BrowserTab.FILES
+            }
             if (initialConfig == null) {
                 _uiState.update {
                     it.copy(
                         isInitializing = false,
                         showSetupScreen = true,
-                        repoConfig = null
+                        repoConfig = null,
+                        browserTabOrder = initialTabOrder,
+                        browserTab = defaultTab
                     )
                 }
             } else {
@@ -153,7 +168,9 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
                         isInitializing = false,
                         showSetupScreen = false,
                         repoConfig = initialConfig,
-                        recentFiles = initialRecents
+                        recentFiles = initialRecents,
+                        browserTabOrder = initialTabOrder,
+                        browserTab = defaultTab
                     )
                 }
                 // Load full repository tree in background
@@ -743,6 +760,12 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
     fun setThemeMode(mode: ThemeMode) {
         viewModelScope.launch {
             configStore.setThemeMode(mode)
+        }
+    }
+
+    fun setBrowserTabOrder(order: BrowserTabOrder) {
+        viewModelScope.launch {
+            configStore.setBrowserTabOrder(order)
         }
     }
 

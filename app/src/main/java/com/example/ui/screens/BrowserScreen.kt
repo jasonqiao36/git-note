@@ -79,6 +79,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.R
 import com.example.data.model.BrowserTab
+import com.example.data.model.BrowserTabOrder
 import com.example.data.model.BrowserViewMode
 import com.example.data.model.RecentFileEntry
 import com.example.data.model.RecentFilter
@@ -94,6 +95,7 @@ fun BrowserScreen(
     currentDirectory: String,
     entries: List<RepoTreeNode>,
     browserTab: BrowserTab,
+    browserTabOrder: BrowserTabOrder,
     browserViewMode: BrowserViewMode,
     expandedDirectories: Set<String>,
     recentFiles: List<RecentFileEntry>,
@@ -124,15 +126,20 @@ fun BrowserScreen(
     val colorScheme = MaterialTheme.colorScheme
     var showFabMenu by remember { mutableStateOf(false) }
 
+    val primaryTab = if (browserTabOrder == BrowserTabOrder.RECENT_FIRST) {
+        BrowserTab.RECENT
+    } else {
+        BrowserTab.FILES
+    }
     val canNavigateUpFolder = browserTab == BrowserTab.FILES &&
         browserViewMode == BrowserViewMode.FOLDER &&
         currentDirectory.isNotEmpty()
 
-    BackHandler(enabled = isSearchActive || browserTab == BrowserTab.RECENT || canNavigateUpFolder) {
+    BackHandler(enabled = isSearchActive || canNavigateUpFolder || browserTab != primaryTab) {
         when {
             isSearchActive -> onSetSearchActive(false)
-            browserTab == BrowserTab.RECENT -> onSelectBrowserTab(BrowserTab.FILES)
             canNavigateUpFolder -> onNavigateUp()
+            browserTab != primaryTab -> onSelectBrowserTab(primaryTab)
         }
     }
 
@@ -294,10 +301,11 @@ fun BrowserScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Top segmented switcher: 「目录」 / 「最近」
+            // Top segmented switcher: 「目录」 / 「最近」 (order configurable in Settings)
             AnimatedVisibility(visible = !isSearchActive) {
                 BrowserTopSegmentedBar(
                     selectedTab = browserTab,
+                    tabOrder = browserTabOrder,
                     viewMode = browserViewMode,
                     recentCount = recentFiles.size,
                     onSelectTab = onSelectBrowserTab
@@ -386,20 +394,22 @@ fun BrowserScreen(
 @Composable
 private fun BrowserTopSegmentedBar(
     selectedTab: BrowserTab,
+    tabOrder: BrowserTabOrder,
     viewMode: BrowserViewMode,
     recentCount: Int,
     onSelectTab: (BrowserTab) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    val filesLabel = if (viewMode == BrowserViewMode.TREE) {
-        "${stringResource(R.string.browser_tab_files)} · ${stringResource(R.string.browser_mode_tree_label)}"
-    } else {
-        stringResource(R.string.browser_tab_files)
-    }
+    val filesLabel = stringResource(R.string.browser_tab_files)
     val recentLabel = if (recentCount > 0) {
         "${stringResource(R.string.browser_tab_recent)} ($recentCount)"
     } else {
         stringResource(R.string.browser_tab_recent)
+    }
+    val orderedTabs = if (tabOrder == BrowserTabOrder.RECENT_FIRST) {
+        listOf(BrowserTab.RECENT, BrowserTab.FILES)
+    } else {
+        listOf(BrowserTab.FILES, BrowserTab.RECENT)
     }
 
     SingleChoiceSegmentedButtonRow(
@@ -408,62 +418,40 @@ private fun BrowserTopSegmentedBar(
             .padding(horizontal = 16.dp, vertical = 6.dp)
             .testTag("browser_top_segmented_bar")
     ) {
-        SegmentedButton(
-            selected = selectedTab == BrowserTab.FILES,
-            onClick = { onSelectTab(BrowserTab.FILES) },
-            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-            colors = SegmentedButtonDefaults.colors(
-                activeContainerColor = colorScheme.primaryContainer,
-                activeContentColor = colorScheme.onPrimaryContainer,
-                inactiveContainerColor = colorScheme.surfaceContainerLowest,
-                inactiveContentColor = colorScheme.onSurfaceVariant,
-                activeBorderColor = colorScheme.primary.copy(alpha = 0.55f),
-                inactiveBorderColor = colorScheme.outlineVariant
-            ),
-            icon = {
-                Icon(
-                    imageVector = if (viewMode == BrowserViewMode.TREE) Icons.Outlined.AccountTree else Icons.Outlined.Folder,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp)
+        orderedTabs.forEachIndexed { index, tab ->
+            val isFiles = tab == BrowserTab.FILES
+            SegmentedButton(
+                selected = selectedTab == tab,
+                onClick = { onSelectTab(tab) },
+                shape = SegmentedButtonDefaults.itemShape(index = index, count = orderedTabs.size),
+                colors = SegmentedButtonDefaults.colors(
+                    activeContainerColor = colorScheme.primaryContainer,
+                    activeContentColor = colorScheme.onPrimaryContainer,
+                    inactiveContainerColor = colorScheme.surfaceContainerLowest,
+                    inactiveContentColor = colorScheme.onSurfaceVariant,
+                    activeBorderColor = colorScheme.primary.copy(alpha = 0.55f),
+                    inactiveBorderColor = colorScheme.outlineVariant
+                ),
+                icon = {
+                    Icon(
+                        imageVector = when {
+                            !isFiles -> Icons.Outlined.History
+                            viewMode == BrowserViewMode.TREE -> Icons.Outlined.AccountTree
+                            else -> Icons.Outlined.Folder
+                        },
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
+                modifier = Modifier.testTag(if (isFiles) "browser_tab_files" else "browser_tab_recent")
+            ) {
+                Text(
+                    text = if (isFiles) filesLabel else recentLabel,
+                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-            },
-            modifier = Modifier.testTag("browser_tab_files")
-        ) {
-            Text(
-                text = filesLabel,
-                style = MaterialTheme.typography.labelLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-
-        SegmentedButton(
-            selected = selectedTab == BrowserTab.RECENT,
-            onClick = { onSelectTab(BrowserTab.RECENT) },
-            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-            colors = SegmentedButtonDefaults.colors(
-                activeContainerColor = colorScheme.primaryContainer,
-                activeContentColor = colorScheme.onPrimaryContainer,
-                inactiveContainerColor = colorScheme.surfaceContainerLowest,
-                inactiveContentColor = colorScheme.onSurfaceVariant,
-                activeBorderColor = colorScheme.primary.copy(alpha = 0.55f),
-                inactiveBorderColor = colorScheme.outlineVariant
-            ),
-            icon = {
-                Icon(
-                    imageVector = Icons.Outlined.History,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp)
-                )
-            },
-            modifier = Modifier.testTag("browser_tab_recent")
-        ) {
-            Text(
-                text = recentLabel,
-                style = MaterialTheme.typography.labelLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            }
         }
     }
 }

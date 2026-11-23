@@ -54,6 +54,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.R
+import com.example.data.model.BrowserTabOrder
 import com.example.data.model.RecentFileEntry
 import com.example.data.model.RepoConfig
 import com.example.data.model.ThemeMode
@@ -222,7 +223,9 @@ private fun BadgePill(
 fun SettingsBottomSheet(
     repoConfig: RepoConfig,
     themeMode: ThemeMode,
+    browserTabOrder: BrowserTabOrder,
     onSelectTheme: (ThemeMode) -> Unit,
+    onSelectBrowserTabOrder: (BrowserTabOrder) -> Unit,
     onReconfigure: () -> Unit,
     onDisconnect: () -> Unit,
     onDismiss: () -> Unit
@@ -267,6 +270,31 @@ fun SettingsBottomSheet(
                             onClick = { onSelectTheme(mode) },
                             shape = SegmentedButtonDefaults.itemShape(index = index, count = modes.size),
                             modifier = Modifier.testTag("settings_theme_${mode.name.lowercase()}")
+                        ) {
+                            Text(text = label, style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
+                }
+            }
+
+            // Top segmented tab order selector
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = stringResource(R.string.settings_tab_order_section),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colorScheme.onSurfaceVariant
+                )
+                val tabOrders = listOf(
+                    BrowserTabOrder.FILES_FIRST to stringResource(R.string.settings_tab_order_files_left),
+                    BrowserTabOrder.RECENT_FIRST to stringResource(R.string.settings_tab_order_recent_left)
+                )
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                    tabOrders.forEachIndexed { index, (order, label) ->
+                        SegmentedButton(
+                            selected = browserTabOrder == order,
+                            onClick = { onSelectBrowserTabOrder(order) },
+                            shape = SegmentedButtonDefaults.itemShape(index = index, count = tabOrders.size),
+                            modifier = Modifier.testTag("settings_tab_order_${order.name.lowercase()}")
                         ) {
                             Text(text = label, style = MaterialTheme.typography.labelMedium)
                         }
