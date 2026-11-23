@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.FolderOpen
@@ -38,6 +40,7 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -224,8 +227,10 @@ fun SettingsBottomSheet(
     repoConfig: RepoConfig,
     themeMode: ThemeMode,
     browserTabOrder: BrowserTabOrder,
+    autoOpenLastNote: Boolean,
     onSelectTheme: (ThemeMode) -> Unit,
     onSelectBrowserTabOrder: (BrowserTabOrder) -> Unit,
+    onToggleAutoOpenLastNote: (Boolean) -> Unit,
     onReconfigure: () -> Unit,
     onDisconnect: () -> Unit,
     onDismiss: () -> Unit
@@ -240,6 +245,7 @@ fun SettingsBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 24.dp),
@@ -299,6 +305,47 @@ fun SettingsBottomSheet(
                             Text(text = label, style = MaterialTheme.typography.labelMedium)
                         }
                     }
+                }
+            }
+
+            // Auto-open last viewed note on app launch toggle
+            Surface(
+                color = colorScheme.surfaceContainerLow,
+                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, colorScheme.outlineVariant, RoundedCornerShape(14.dp))
+                    .clip(RoundedCornerShape(14.dp))
+                    .clickable { onToggleAutoOpenLastNote(!autoOpenLastNote) }
+                    .testTag("settings_auto_open_last_row")
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.settings_auto_open_last_title),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = colorScheme.onSurface
+                        )
+                        Text(
+                            text = stringResource(R.string.settings_auto_open_last_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = autoOpenLastNote,
+                        onCheckedChange = onToggleAutoOpenLastNote,
+                        modifier = Modifier.testTag("settings_auto_open_last_switch")
+                    )
                 }
             }
 

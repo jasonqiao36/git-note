@@ -3,6 +3,7 @@ package com.example.data.local
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -53,6 +54,10 @@ class ConfigStore(private val context: Context) {
         BrowserTabOrder.entries.firstOrNull { it.name == raw } ?: BrowserTabOrder.FILES_FIRST
     }
 
+    val autoOpenLastNoteFlow: Flow<Boolean> = context.gitNoteDataStore.data.map { prefs ->
+        prefs[KEY_AUTO_OPEN_LAST_NOTE] ?: true
+    }
+
     val recentFilesFlow: Flow<List<RecentFileEntry>> = context.gitNoteDataStore.data.map { prefs ->
         parseRecentList(prefs[KEY_RECENT_FILES])
     }
@@ -62,6 +67,8 @@ class ConfigStore(private val context: Context) {
     suspend fun getInitialRecentFiles(): List<RecentFileEntry> = recentFilesFlow.first()
 
     suspend fun getInitialBrowserTabOrder(): BrowserTabOrder = browserTabOrderFlow.first()
+
+    suspend fun getInitialAutoOpenLastNote(): Boolean = autoOpenLastNoteFlow.first()
 
     suspend fun saveRepoConfig(config: RepoConfig) {
         val current = repoConfigFlow.first()
@@ -94,6 +101,12 @@ class ConfigStore(private val context: Context) {
     suspend fun setBrowserTabOrder(order: BrowserTabOrder) {
         context.gitNoteDataStore.edit { prefs ->
             prefs[KEY_BROWSER_TAB_ORDER] = order.name
+        }
+    }
+
+    suspend fun setAutoOpenLastNote(enabled: Boolean) {
+        context.gitNoteDataStore.edit { prefs ->
+            prefs[KEY_AUTO_OPEN_LAST_NOTE] = enabled
         }
     }
 
@@ -163,6 +176,7 @@ class ConfigStore(private val context: Context) {
         private val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
         private val KEY_BROWSER_VIEW_MODE = stringPreferencesKey("browser_view_mode")
         private val KEY_BROWSER_TAB_ORDER = stringPreferencesKey("browser_tab_order")
+        private val KEY_AUTO_OPEN_LAST_NOTE = booleanPreferencesKey("auto_open_last_note")
         private val KEY_RECENT_FILES = stringPreferencesKey("recent_files_json")
     }
 }

@@ -90,6 +90,8 @@
     <string name="settings_tab_order_section">顶部分段顺序</string>
     <string name="settings_tab_order_files_left">目录在左</string>
     <string name="settings_tab_order_recent_left">最近在左</string>
+    <string name="settings_auto_open_last_title">启动时自动打开上次笔记</string>
+    <string name="settings_auto_open_last_desc">关闭后，启动应用时直接停留在列表页</string>
     <string name="settings_repo_section">当前仓库</string>
     <string name="settings_branch_label">分支</string>
     <string name="settings_reconfigure">重新配置仓库 / Token</string>

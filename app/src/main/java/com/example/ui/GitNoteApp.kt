@@ -124,8 +124,10 @@ fun GitNoteApp(
             repoConfig = repoConfig,
             themeMode = uiState.themeMode,
             browserTabOrder = uiState.browserTabOrder,
+            autoOpenLastNote = uiState.autoOpenLastNote,
             onSelectTheme = viewModel::setThemeMode,
             onSelectBrowserTabOrder = viewModel::setBrowserTabOrder,
+            onToggleAutoOpenLastNote = viewModel::setAutoOpenLastNote,
             onReconfigure = viewModel::openReconfigureSetup,
             onDisconnect = viewModel::disconnectRepository,
             onDismiss = { viewModel.setShowSettingsSheet(false) }

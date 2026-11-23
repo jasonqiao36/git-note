@@ -59,6 +59,7 @@ data class GitNoteUiState(
     val isInitializing: Boolean = true,
     val repoConfig: RepoConfig? = null,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val autoOpenLastNote: Boolean = true,
     val showSetupScreen: Boolean = false,
     val isConnecting: Boolean = false,
     val setupError: String? = null,
@@ -138,6 +139,11 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
             }
         }
         viewModelScope.launch {
+            configStore.autoOpenLastNoteFlow.collect { autoOpen ->
+                _uiState.update { it.copy(autoOpenLastNote = autoOpen) }
+            }
+        }
+        viewModelScope.launch {
             configStore.recentFilesFlow.collect { recents ->
                 _uiState.update { it.copy(recentFiles = recents) }
             }
@@ -146,6 +152,7 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
             val initialConfig = configStore.getInitialRepoConfig()
             val initialRecents = configStore.getInitialRecentFiles()
             val initialTabOrder = configStore.getInitialBrowserTabOrder()
+            val initialAutoOpenLast = configStore.getInitialAutoOpenLastNote()
             val defaultTab = if (initialTabOrder == BrowserTabOrder.RECENT_FIRST) {
                 BrowserTab.RECENT
             } else {
@@ -158,7 +165,8 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
                         showSetupScreen = true,
                         repoConfig = null,
                         browserTabOrder = initialTabOrder,
-                        browserTab = defaultTab
+                        browserTab = defaultTab,
+                        autoOpenLastNote = initialAutoOpenLast
                     )
                 }
             } else {
@@ -170,13 +178,14 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
                         repoConfig = initialConfig,
                         recentFiles = initialRecents,
                         browserTabOrder = initialTabOrder,
-                        browserTab = defaultTab
+                        browserTab = defaultTab,
+                        autoOpenLastNote = initialAutoOpenLast
                     )
                 }
                 // Load full repository tree in background
                 loadRepositoryTree(initialConfig)
-                // Auto-open last viewed/edited file for seamless continuity
-                if (!lastPath.isNullOrBlank()) {
+                // Auto-open last viewed/edited file only when enabled in settings
+                if (initialAutoOpenLast && !lastPath.isNullOrBlank()) {
                     openFileInternal(path = lastPath, isAutoOpenOnLaunch = true)
                 }
             }
@@ -769,6 +778,12 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun setAutoOpenLastNote(enabled: Boolean) {
+        viewModelScope.launch {
+            configStore.setAutoOpenLastNote(enabled)
+        }
+    }
+
     fun openReconfigureSetup() {
         _uiState.update {
             it.copy(
@@ -786,6 +801,9 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
                 GitNoteUiState(
                     isInitializing = false,
                     themeMode = it.themeMode,
+                    autoOpenLastNote = it.autoOpenLastNote,
+                    browserTabOrder = it.browserTabOrder,
+                    browserViewMode = it.browserViewMode,
                     showSetupScreen = true
                 )
             }
