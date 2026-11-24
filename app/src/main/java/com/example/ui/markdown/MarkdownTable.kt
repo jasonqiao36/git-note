@@ -173,8 +173,9 @@ private class TableLayoutMetrics {
 @Composable
 internal fun MarkdownTableView(
     table: MarkdownTableData,
-    codeBg: Color,
-    linkColor: Color,
+    palette: MarkdownInlinePalette,
+    referenceLinks: Map<String, ReferenceLinkDef>,
+    onNavigateLink: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -280,8 +281,9 @@ internal fun MarkdownTableView(
                             RichMarkdownText(
                                 text = table.headers[c],
                                 style = headerStyle.copy(textAlign = textAlign),
-                                codeBg = codeBg,
-                                linkColor = linkColor,
+                                palette = palette,
+                                referenceLinks = referenceLinks,
+                                onNavigateLink = onNavigateLink,
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
@@ -297,8 +299,9 @@ internal fun MarkdownTableView(
                                 RichMarkdownText(
                                     text = row.getOrElse(c) { "" },
                                     style = cellStyle.copy(textAlign = textAlign),
-                                    codeBg = codeBg,
-                                    linkColor = linkColor,
+                                    palette = palette,
+                                    referenceLinks = referenceLinks,
+                                    onNavigateLink = onNavigateLink,
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }

@@ -570,17 +570,16 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
             val lines = note.draftContent.replace("\r\n", "\n").split("\n").toMutableList()
             if (lineIndex !in lines.indices) return@update state
             val line = lines[lineIndex]
-            val updatedLine = when {
-                line.contains("- [ ] ") -> line.replaceFirst("- [ ] ", "- [x] ")
-                line.contains("- [x] ") -> line.replaceFirst("- [x] ", "- [ ] ")
-                line.contains("- [X] ") -> line.replaceFirst("- [X] ", "- [ ] ")
-                line.contains("* [ ] ") -> line.replaceFirst("* [ ] ", "* [x] ")
-                line.contains("* [x] ") -> line.replaceFirst("* [x] ", "* [ ] ")
-                else -> line
-            }
-            lines[lineIndex] = updatedLine
+            val taskRegex = Regex("^([\\t ]*(?:[-*+]|\\d+[.)])\\s+\\[)([ xX])(].*)$")
+            val match = taskRegex.matchEntire(line) ?: return@update state
+            val nextMark = if (match.groupValues[2] == " ") "x" else " "
+            lines[lineIndex] = "${match.groupValues[1]}$nextMark${match.groupValues[3]}"
             state.copy(openNote = note.copy(draftContent = lines.joinToString("\n")))
         }
+    }
+
+    fun showSnackbarMessage(message: String) {
+        _uiState.update { it.copy(snackbarMessage = message) }
     }
 
     fun saveCurrentNote(onSuccessAfterSave: (() -> Unit)? = null) {

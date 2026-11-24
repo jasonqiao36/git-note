@@ -66,6 +66,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.R
+import com.example.data.model.RepoConfig
 import com.example.ui.markdown.MarkdownPreview
 import com.example.ui.theme.EditorMonoTextStyle
 import com.example.ui.viewmodel.OpenNoteState
@@ -76,10 +77,14 @@ fun NoteScreen(
     note: OpenNoteState,
     showBackButton: Boolean,
     hasRecentFiles: Boolean,
+    repoConfig: RepoConfig?,
+    availableFilePaths: List<String>,
     onBack: () -> Unit,
     onToggleEditMode: () -> Unit,
     onDraftChange: (String) -> Unit,
     onToggleTaskLine: (Int) -> Unit,
+    onOpenRelativeNote: (String) -> Unit,
+    onLinkFeedback: (String) -> Unit,
     onSave: () -> Unit,
     onRetry: () -> Unit,
     onOpenRecentSwitcher: () -> Unit,
@@ -330,7 +335,12 @@ fun NoteScreen(
                         } else {
                             MarkdownReadingPane(
                                 content = note.draftContent,
+                                currentNotePath = note.path,
+                                repoConfig = repoConfig,
+                                availableFilePaths = availableFilePaths,
                                 onToggleTaskLine = onToggleTaskLine,
+                                onOpenRelativeNote = onOpenRelativeNote,
+                                onLinkFeedback = onLinkFeedback,
                                 onTapEmptyToEdit = onToggleEditMode
                             )
                         }
@@ -344,7 +354,12 @@ fun NoteScreen(
 @Composable
 private fun MarkdownReadingPane(
     content: String,
+    currentNotePath: String,
+    repoConfig: RepoConfig?,
+    availableFilePaths: List<String>,
     onToggleTaskLine: (Int) -> Unit,
+    onOpenRelativeNote: (String) -> Unit,
+    onLinkFeedback: (String) -> Unit,
     onTapEmptyToEdit: () -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -377,7 +392,12 @@ private fun MarkdownReadingPane(
         } else {
             MarkdownPreview(
                 markdown = content,
-                onToggleTaskLine = onToggleTaskLine
+                onToggleTaskLine = onToggleTaskLine,
+                currentNotePath = currentNotePath,
+                repoConfig = repoConfig,
+                availableFilePaths = availableFilePaths,
+                onOpenRelativeNote = onOpenRelativeNote,
+                onLinkFeedback = onLinkFeedback
             )
             Spacer(modifier = Modifier.height(64.dp))
         }
@@ -436,6 +456,7 @@ private fun MarkdownQuickSymbolBar(
             MdShortcut("• 列表", "- "),
             MdShortcut("☐ 待办", "- [ ] "),
             MdShortcut("粗体", "**", "**"),
+            MdShortcut("链接", "[", "](https://)"),
             MdShortcut("代码", "`", "`"),
             MdShortcut("引用", "> "),
             MdShortcut("代码块", "```\n", "\n```"),

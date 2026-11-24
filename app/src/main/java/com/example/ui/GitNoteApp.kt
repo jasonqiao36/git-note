@@ -249,16 +249,23 @@ private fun MainWorkspace(
                     thickness = 1.dp,
                     color = MaterialTheme.colorScheme.outlineVariant
                 )
+                val availableFilePaths = remember(uiState.allNodes) {
+                    uiState.allNodes.filter { !it.isDirectory }.map { it.path }
+                }
                 val openNote = uiState.openNote
                 if (openNote != null) {
                     NoteScreen(
                         note = openNote,
                         showBackButton = false,
                         hasRecentFiles = uiState.recentFiles.isNotEmpty(),
+                        repoConfig = repoConfig,
+                        availableFilePaths = availableFilePaths,
                         onBack = viewModel::requestCloseNote,
                         onToggleEditMode = viewModel::toggleEditMode,
                         onDraftChange = viewModel::updateDraftContent,
                         onToggleTaskLine = viewModel::toggleTaskLineInDraft,
+                        onOpenRelativeNote = viewModel::requestOpenFile,
+                        onLinkFeedback = viewModel::showSnackbarMessage,
                         onSave = { viewModel.saveCurrentNote() },
                         onRetry = viewModel::retryOpenCurrentNote,
                         onOpenRecentSwitcher = { viewModel.setShowRecentSheet(true) },
@@ -283,16 +290,23 @@ private fun MainWorkspace(
                 label = "workspace_pane_transition",
                 modifier = Modifier.fillMaxSize()
             ) { showingNote ->
+                val availableFilePaths = remember(uiState.allNodes) {
+                    uiState.allNodes.filter { !it.isDirectory }.map { it.path }
+                }
                 val openNote = uiState.openNote
                 if (showingNote && openNote != null) {
                     NoteScreen(
                         note = openNote,
                         showBackButton = true,
                         hasRecentFiles = uiState.recentFiles.isNotEmpty(),
+                        repoConfig = repoConfig,
+                        availableFilePaths = availableFilePaths,
                         onBack = viewModel::requestCloseNote,
                         onToggleEditMode = viewModel::toggleEditMode,
                         onDraftChange = viewModel::updateDraftContent,
                         onToggleTaskLine = viewModel::toggleTaskLineInDraft,
+                        onOpenRelativeNote = viewModel::requestOpenFile,
+                        onLinkFeedback = viewModel::showSnackbarMessage,
                         onSave = { viewModel.saveCurrentNote() },
                         onRetry = viewModel::retryOpenCurrentNote,
                         onOpenRecentSwitcher = { viewModel.setShowRecentSheet(true) }
