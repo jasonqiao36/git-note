@@ -95,13 +95,15 @@ data class GitNoteUiState(
     val pendingDiscardAction: PendingDiscardAction? = null,
     val snackbarMessage: String? = null,
 
-    // App updates (GitHub Releases)
+    // App updates (GitHub Releases / Actions Artifacts)
     val appUpdateConfig: AppUpdateConfig? = null,
     val isCheckingUpdate: Boolean = false,
     val availableUpdate: AppUpdateInfo? = null,
     val updateDownloadState: UpdateDownloadState = UpdateDownloadState.Idle,
     val showUpdateConfigDialog: Boolean = false,
-    val updateConfigError: String? = null
+    val updateConfigError: String? = null,
+    val updateCheckStatusMessage: String? = null,
+    val updateCheckStatusIsError: Boolean = false
 ) {
     val currentDirectoryEntries: List<RepoTreeNode>
         get() = allNodes.filter { node ->
@@ -789,7 +791,13 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun setShowSettingsSheet(show: Boolean) {
-        _uiState.update { it.copy(showSettingsSheet = show) }
+        _uiState.update {
+            it.copy(
+                showSettingsSheet = show,
+                updateCheckStatusMessage = if (show) it.updateCheckStatusMessage else null,
+                updateCheckStatusIsError = if (show) it.updateCheckStatusIsError else false
+            )
+        }
     }
 
     fun setThemeMode(mode: ThemeMode) {
@@ -847,9 +855,11 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
                     appUpdateConfig = config,
                     showUpdateConfigDialog = false,
                     updateConfigError = null,
-                    snackbarMessage = "已保存更新源 ${config.fullName}"
+                    updateCheckStatusMessage = null,
+                    updateCheckStatusIsError = false
                 )
             }
+            checkForUpdates(manual = true)
         }
     }
 
@@ -865,7 +875,8 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
                     updateDownloadState = UpdateDownloadState.Idle,
                     showUpdateConfigDialog = false,
                     updateConfigError = null,
-                    snackbarMessage = "已清除更新源配置"
+                    updateCheckStatusMessage = "已清除更新源配置",
+                    updateCheckStatusIsError = false
                 )
             }
         }
@@ -883,22 +894,31 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
 
         val fallbackToken = _uiState.value.repoConfig?.token.orEmpty()
         viewModelScope.launch {
-            _uiState.update { it.copy(isCheckingUpdate = true) }
+            _uiState.update {
+                it.copy(
+                    isCheckingUpdate = true,
+                    updateCheckStatusMessage = if (manual) null else it.updateCheckStatusMessage,
+                    updateCheckStatusIsError = if (manual) false else it.updateCheckStatusIsError
+                )
+            }
             val result = updateRepository.checkLatestRelease(config, fallbackToken)
             result.fold(
                 onSuccess = { info ->
                     if (info.isNewer || manual) {
+                        val latestMsg = if (!info.isNewer && manual) {
+                            "当前已是最新版本（远端最新：${info.tagName}）"
+                        } else {
+                            null
+                        }
                         _uiState.update {
                             it.copy(
                                 isCheckingUpdate = false,
                                 showSettingsSheet = if (info.isNewer) false else it.showSettingsSheet,
                                 availableUpdate = if (info.isNewer) info else null,
                                 updateDownloadState = if (info.isNewer) UpdateDownloadState.Idle else it.updateDownloadState,
-                                snackbarMessage = if (!info.isNewer && manual) {
-                                    "当前已是最新版本（远端最新：${info.tagName}）"
-                                } else {
-                                    null
-                                }
+                                updateCheckStatusMessage = latestMsg,
+                                updateCheckStatusIsError = false,
+                                snackbarMessage = if (latestMsg != null && !it.showSettingsSheet) latestMsg else null
                             )
                         }
                     } else {
@@ -906,10 +926,13 @@ class GitNoteViewModel(application: Application) : AndroidViewModel(application)
                     }
                 },
                 onFailure = { error ->
+                    val errMsg = error.message ?: "检查更新失败"
                     _uiState.update {
                         it.copy(
                             isCheckingUpdate = false,
-                            snackbarMessage = if (manual) (error.message ?: "检查更新失败") else null
+                            updateCheckStatusMessage = if (manual) errMsg else it.updateCheckStatusMessage,
+                            updateCheckStatusIsError = if (manual) true else it.updateCheckStatusIsError,
+                            snackbarMessage = if (manual && !it.showSettingsSheet) errMsg else null
                         )
                     }
                 }

@@ -129,6 +129,8 @@ fun GitNoteApp(
             autoOpenLastNote = uiState.autoOpenLastNote,
             appUpdateConfig = uiState.appUpdateConfig,
             isCheckingUpdate = uiState.isCheckingUpdate,
+            updateCheckStatusMessage = uiState.updateCheckStatusMessage,
+            updateCheckStatusIsError = uiState.updateCheckStatusIsError,
             onSelectTheme = viewModel::setThemeMode,
             onSelectBrowserTabOrder = viewModel::setBrowserTabOrder,
             onToggleAutoOpenLastNote = viewModel::setAutoOpenLastNote,

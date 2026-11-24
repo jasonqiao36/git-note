@@ -208,7 +208,8 @@ fun UpdateAvailableDialog(
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
 
-    val hasDirectApk = updateInfo.apkAssetId != null || !updateInfo.apkApiUrl.isNullOrBlank()
+    val hasDirectApk = (updateInfo.apkAssetId != null || !updateInfo.apkApiUrl.isNullOrBlank()) &&
+        !updateInfo.requiresTokenForDownload
     val isDownloading = downloadState is UpdateDownloadState.Downloading
     var needsUnknownSourcePermission by remember { mutableStateOf(false) }
     var pendingInstallPath by remember { mutableStateOf<String?>(null) }

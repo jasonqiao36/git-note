@@ -1,6 +1,7 @@
 package com.example.data.api
 
 import com.example.data.model.FileContentResponse
+import com.example.data.model.GitHubArtifactsResponse
 import com.example.data.model.GitHubReleaseResponse
 import com.example.data.model.GitTreeResponse
 import com.example.data.model.PutFileRequest
@@ -55,6 +56,13 @@ interface GitHubApiService {
     suspend fun listReleases(
         @Path("owner") owner: String,
         @Path("repo") repo: String,
-        @Query("per_page") perPage: Int = 5
+        @Query("per_page") perPage: Int = 15
     ): Response<List<GitHubReleaseResponse>>
+
+    @GET("repos/{owner}/{repo}/actions/artifacts")
+    suspend fun listActionsArtifacts(
+        @Path("owner") owner: String,
+        @Path("repo") repo: String,
+        @Query("per_page") perPage: Int = 20
+    ): Response<GitHubArtifactsResponse>
 }

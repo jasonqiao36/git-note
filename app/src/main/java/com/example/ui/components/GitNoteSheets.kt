@@ -234,6 +234,8 @@ fun SettingsBottomSheet(
     autoOpenLastNote: Boolean,
     appUpdateConfig: AppUpdateConfig?,
     isCheckingUpdate: Boolean,
+    updateCheckStatusMessage: String?,
+    updateCheckStatusIsError: Boolean,
     onSelectTheme: (ThemeMode) -> Unit,
     onSelectBrowserTabOrder: (BrowserTabOrder) -> Unit,
     onToggleAutoOpenLastNote: (Boolean) -> Unit,
@@ -392,6 +394,16 @@ fun SettingsBottomSheet(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
+                        if (!updateCheckStatusMessage.isNullOrBlank()) {
+                            Text(
+                                text = updateCheckStatusMessage,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (updateCheckStatusIsError) colorScheme.error else colorScheme.primary,
+                                modifier = Modifier
+                                    .padding(top = 4.dp)
+                                    .testTag("settings_update_status_text")
+                            )
+                        }
                     }
                 }
                 Row(

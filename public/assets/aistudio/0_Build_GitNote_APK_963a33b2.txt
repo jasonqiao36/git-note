@@ -1,0 +1,751 @@
+﻿2026-11-24T11:00:30.3964377Z Current runner version: '2.338.2'
+2026-11-24T11:00:30.3989418Z ##[group]Runner Image Provisioner
+2026-11-24T11:00:30.3990277Z Hosted Compute Agent
+2026-11-24T11:00:30.3990977Z Version: 20261111.635
+2026-11-24T11:00:30.3991636Z Commit: b8a594ea514ff44cadb5342986c68b1eac6e22ed
+2026-11-24T11:00:30.3992451Z Build Date: 2026-11-11T01:49:01Z
+2026-11-24T11:00:30.3993488Z Worker ID: {e518f563-2df0-428a-bd69-29a1e9654470}
+2026-11-24T11:00:30.3994250Z Region: westus2
+2026-11-24T11:00:30.3994895Z Cloud: Azure
+2026-11-24T11:00:30.3995451Z ##[endgroup]
+2026-11-24T11:00:30.3996991Z ##[group]Operating System
+2026-11-24T11:00:30.3997730Z Ubuntu
+2026-11-24T11:00:30.3998262Z 26.04.1
+2026-11-24T11:00:30.3998764Z LTS
+2026-11-24T11:00:30.3999455Z ##[endgroup]
+2026-11-24T11:00:30.4000046Z ##[group]Runner Image
+2026-11-24T11:00:30.4000717Z Image: ubuntu-26.04
+2026-11-24T11:00:30.4001308Z Version: 20261116.202.1
+2026-11-24T11:00:30.4002632Z Included Software: https://github.com/actions/runner-images/blob/ubuntu26/20261116.202/images/ubuntu/Ubuntu2604-Readme.md
+2026-11-24T11:00:30.4004631Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu26%2F20261116.202
+2026-11-24T11:00:30.4005690Z ##[endgroup]
+2026-11-24T11:00:30.4006804Z ##[group]GITHUB_TOKEN Permissions
+2026-11-24T11:00:30.4009058Z Contents: write
+2026-11-24T11:00:30.4009712Z Metadata: read
+2026-11-24T11:00:30.4010347Z ##[endgroup]
+2026-11-24T11:00:30.4012464Z Secret source: Actions
+2026-11-24T11:00:30.4013870Z Cache mode: write
+2026-11-24T11:00:30.4015065Z Prepare workflow directory
+2026-11-24T11:00:30.4352755Z Prepare all required actions
+2026-11-24T11:00:30.4402695Z Getting action download info
+2026-11-24T11:00:30.8008869Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-11-24T11:00:30.8897011Z Download action repository 'actions/setup-java@v4' (SHA:cf277c60eb25467037889841efdb72551f06f6c3)
+2026-11-24T11:00:31.2442274Z Download action repository 'gradle/actions@v4' (SHA:ed408507eac070d1f99cc633dbcf757c94c7933a)
+2026-11-24T11:00:31.8260470Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-11-24T11:00:31.9102729Z Download action repository 'softprops/action-gh-release@v2' (SHA:3bb12739c298aeb8a4eeaf626c5b8d85266b0e65)
+2026-11-24T11:00:32.2466117Z Complete job name: Build GitNote APK
+2026-11-24T11:00:32.3442786Z ##[group]Run actions/checkout@v4
+2026-11-24T11:00:32.3443688Z with:
+2026-11-24T11:00:32.3443989Z   repository: jasonqiao36/git-note
+2026-11-24T11:00:32.3446647Z   token: ***
+2026-11-24T11:00:32.3446922Z   ssh-strict: true
+2026-11-24T11:00:32.3447194Z   ssh-user: git
+2026-11-24T11:00:32.3447480Z   persist-credentials: true
+2026-11-24T11:00:32.3447791Z   clean: true
+2026-11-24T11:00:32.3448078Z   sparse-checkout-cone-mode: true
+2026-11-24T11:00:32.3448404Z   fetch-depth: 1
+2026-11-24T11:00:32.3448679Z   fetch-tags: false
+2026-11-24T11:00:32.3448973Z   show-progress: true
+2026-11-24T11:00:32.3449261Z   lfs: false
+2026-11-24T11:00:32.3449510Z   submodules: false
+2026-11-24T11:00:32.3449807Z   set-safe-directory: true
+2026-11-24T11:00:32.3450124Z   allow-unsafe-pr-checkout: false
+2026-11-24T11:00:32.3450694Z ##[endgroup]
+2026-11-24T11:00:32.6008819Z Syncing repository: jasonqiao36/git-note
+2026-11-24T11:00:32.6010996Z ##[group]Getting Git version info
+2026-11-24T11:00:32.6011903Z Working directory is '/home/runner/work/git-note/git-note'
+2026-11-24T11:00:32.6013080Z [command]/usr/bin/git version
+2026-11-24T11:00:32.6013828Z git version 2.56.1
+2026-11-24T11:00:32.6035504Z ##[endgroup]
+2026-11-24T11:00:32.6050545Z Temporarily overriding HOME='/home/runner/work/_temp/0455384a-83e1-49b6-bd13-1c007cb7f469' before making global git config changes
+2026-11-24T11:00:32.6052267Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-24T11:00:32.6056368Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/git-note/git-note
+2026-11-24T11:00:32.6122421Z Deleting the contents of '/home/runner/work/git-note/git-note'
+2026-11-24T11:00:32.6125952Z ##[group]Initializing the repository
+2026-11-24T11:00:32.6131657Z [command]/usr/bin/git init /home/runner/work/git-note/git-note
+2026-11-24T11:00:32.6239507Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-11-24T11:00:32.6240885Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-11-24T11:00:32.6241571Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-11-24T11:00:32.6242066Z hint: call:
+2026-11-24T11:00:32.6242321Z hint:
+2026-11-24T11:00:32.6242713Z hint: 	git config --global init.defaultBranch <name>
+2026-11-24T11:00:32.6243151Z hint:
+2026-11-24T11:00:32.6243829Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-11-24T11:00:32.6244444Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-11-24T11:00:32.6244949Z hint:
+2026-11-24T11:00:32.6245224Z hint: 	git branch -m <name>
+2026-11-24T11:00:32.6245532Z hint:
+2026-11-24T11:00:32.6245969Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-11-24T11:00:32.6250983Z Initialized empty Git repository in /home/runner/work/git-note/git-note/.git/
+2026-11-24T11:00:32.6265978Z [command]/usr/bin/git remote add origin https://github.com/jasonqiao36/git-note
+2026-11-24T11:00:32.6321969Z ##[endgroup]
+2026-11-24T11:00:32.6323103Z ##[group]Disabling automatic garbage collection
+2026-11-24T11:00:32.6326741Z [command]/usr/bin/git config --local gc.auto 0
+2026-11-24T11:00:32.6365083Z ##[endgroup]
+2026-11-24T11:00:32.6365735Z ##[group]Setting up auth
+2026-11-24T11:00:32.6375000Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-24T11:00:32.6413754Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-24T11:00:32.6879867Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-24T11:00:32.6921803Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-24T11:00:32.7217091Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-24T11:00:32.7252121Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-24T11:00:32.7529304Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-11-24T11:00:32.7569981Z ##[endgroup]
+2026-11-24T11:00:32.7570695Z ##[group]Fetching the repository
+2026-11-24T11:00:32.7580558Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +9b6c4246108e928a40297835752038dee5dcc4dc:refs/remotes/origin/main
+2026-11-24T11:00:33.2007740Z From https://github.com/jasonqiao36/git-note
+2026-11-24T11:00:33.2009357Z  * [new ref]         9b6c4246108e928a40297835752038dee5dcc4dc -> origin/main
+2026-11-24T11:00:33.2013451Z ##[endgroup]
+2026-11-24T11:00:33.2014138Z ##[group]Determining the checkout info
+2026-11-24T11:00:33.2016593Z ##[endgroup]
+2026-11-24T11:00:33.2022147Z [command]/usr/bin/git sparse-checkout disable
+2026-11-24T11:00:33.2079235Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-11-24T11:00:33.2115226Z ##[group]Checking out the ref
+2026-11-24T11:00:33.2121138Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-11-24T11:00:33.2291088Z Switched to a new branch 'main'
+2026-11-24T11:00:33.2295322Z branch 'main' set up to track 'origin/main'.
+2026-11-24T11:00:33.2303496Z ##[endgroup]
+2026-11-24T11:00:33.2351780Z [command]/usr/bin/git log -1 --format=%H
+2026-11-24T11:00:33.2378583Z 9b6c4246108e928a40297835752038dee5dcc4dc
+2026-11-24T11:00:33.2683698Z ##[group]Run actions/setup-java@v4
+2026-11-24T11:00:33.2684259Z with:
+2026-11-24T11:00:33.2684513Z   distribution: temurin
+2026-11-24T11:00:33.2684797Z   java-version: 21
+2026-11-24T11:00:33.2685065Z   java-package: jdk
+2026-11-24T11:00:33.2685338Z   check-latest: false
+2026-11-24T11:00:33.2685607Z   server-id: github
+2026-11-24T11:00:33.2685885Z   server-username: GITHUB_ACTOR
+2026-11-24T11:00:33.2686205Z   server-password: GITHUB_TOKEN
+2026-11-24T11:00:33.2686516Z   overwrite-settings: true
+2026-11-24T11:00:33.2686808Z   job-status: success
+2026-11-24T11:00:33.2689309Z   token: ***
+2026-11-24T11:00:33.2689563Z ##[endgroup]
+2026-11-24T11:00:33.4469428Z ##[warning]setup-java v4 is deprecated and will no longer receive updates. Please migrate to actions/setup-java@v5.
+2026-11-24T11:00:33.4477251Z ##[group]Installed distributions
+2026-11-24T11:00:33.4510903Z Resolved Java 21.0.13+9 from tool-cache
+2026-11-24T11:00:33.4511624Z Setting Java 21.0.13+9 as the default
+2026-11-24T11:00:33.4522310Z (node:2865) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-24T11:00:33.4524038Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-24T11:00:33.4526761Z Creating toolchains.xml for JDK version 21 from temurin
+2026-11-24T11:00:33.4604584Z Writing to /home/runner/.m2/toolchains.xml
+2026-11-24T11:00:33.4605109Z 
+2026-11-24T11:00:33.4605436Z Java configuration:
+2026-11-24T11:00:33.4605964Z   Distribution: temurin
+2026-11-24T11:00:33.4606498Z   Version: 21.0.13+9
+2026-11-24T11:00:33.4607186Z   Path: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:00:33.4607788Z 
+2026-11-24T11:00:33.4608550Z ##[endgroup]
+2026-11-24T11:00:33.4624623Z Creating settings.xml with server-id: github
+2026-11-24T11:00:33.4654342Z Writing to /home/runner/.m2/settings.xml
+2026-11-24T11:00:33.4834819Z ##[group]Run SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+2026-11-24T11:00:33.4835574Z [36;1mSDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"[0m
+2026-11-24T11:00:33.4836350Z [36;1mSDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -type f -name sdkmanager 2>/dev/null | sort -V | tail -n 1 || true)"[0m
+2026-11-24T11:00:33.4836994Z [36;1mif [ -z "$SDKMANAGER" ]; then[0m
+2026-11-24T11:00:33.4837452Z [36;1m  echo "::error::Could not find sdkmanager under $SDK_ROOT/cmdline-tools"[0m
+2026-11-24T11:00:33.4837892Z [36;1m  exit 1[0m
+2026-11-24T11:00:33.4838146Z [36;1mfi[0m
+2026-11-24T11:00:33.4838417Z [36;1mecho "Using sdkmanager: $SDKMANAGER"[0m
+2026-11-24T11:00:33.4838828Z [36;1myes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true[0m
+2026-11-24T11:00:33.4883759Z shell: /usr/bin/bash -e {0}
+2026-11-24T11:00:33.4884130Z env:
+2026-11-24T11:00:33.4884558Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:00:33.4885163Z   JAVA_HOME_21_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:00:33.4885604Z ##[endgroup]
+2026-11-24T11:00:33.5491328Z Using sdkmanager: /usr/local/lib/android/sdk/cmdline-tools/latest/bin/sdkmanager
+2026-11-24T11:00:39.0261000Z yes: standard output: Broken pipe
+2026-11-24T11:00:39.0517869Z ##[group]Run gradle/actions/setup-gradle@v4
+2026-11-24T11:00:39.0518228Z with:
+2026-11-24T11:00:39.0518441Z   gradle-version: 9.3.1
+2026-11-24T11:00:39.0518680Z   cache-disabled: false
+2026-11-24T11:00:39.0518904Z   cache-read-only: false
+2026-11-24T11:00:39.0519137Z   cache-write-only: false
+2026-11-24T11:00:39.0519387Z   cache-overwrite-existing: false
+2026-11-24T11:00:39.0519657Z   cache-cleanup: on-success
+2026-11-24T11:00:39.0519960Z   gradle-home-cache-includes: caches
+notifications
+
+2026-11-24T11:00:39.0520298Z   add-job-summary: always
+2026-11-24T11:00:39.0520559Z   add-job-summary-as-pr-comment: never
+2026-11-24T11:00:39.0520855Z   dependency-graph: disabled
+2026-11-24T11:00:39.0521189Z   dependency-graph-report-dir: dependency-graph-reports
+2026-11-24T11:00:39.0521588Z   dependency-graph-continue-on-failure: true
+2026-11-24T11:00:39.0522114Z   build-scan-publish: false
+2026-11-24T11:00:39.0522368Z   validate-wrappers: true
+2026-11-24T11:00:39.0522651Z   allow-snapshot-wrappers: false
+2026-11-24T11:00:39.0522930Z   gradle-home-cache-strict-match: false
+2026-11-24T11:00:39.0523505Z   workflow-job-context: null
+2026-11-24T11:00:39.0525989Z   github-token: ***
+2026-11-24T11:00:39.0526207Z env:
+2026-11-24T11:00:39.0526508Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:00:39.0527013Z   JAVA_HOME_21_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:00:39.0527407Z ##[endgroup]
+2026-11-24T11:00:39.4204025Z Merged default JDK locations into /home/runner/.m2/toolchains.xml
+2026-11-24T11:00:39.4204928Z Preparing cache for cleanup.
+2026-11-24T11:00:39.4205506Z ##[group]Restore Gradle state from cache
+2026-11-24T11:00:39.6772330Z Cache hit for restore-key: gradle-home-v1|Linux-X64|build-apk[c585a5624ecd68c767cac3aa9db97875]-224148f3da4b193799ee0e440abdfc16a9ae3790
+2026-11-24T11:00:40.9838258Z Received 799149 of 25964973 (3.1%), 0.8 MBs/sec
+2026-11-24T11:00:41.1727139Z Received 25964973 of 25964973 (100.0%), 20.8 MBs/sec
+2026-11-24T11:00:41.1728626Z Cache Size: ~25 MB (25964973 B)
+2026-11-24T11:00:41.1765701Z [command]/usr/bin/tar -xf /home/runner/work/_temp/e625135b-854b-4640-965b-115aeaae015a/cache.tzst -P -C /home/runner/work/git-note/git-note --use-compress-program unzstd
+2026-11-24T11:00:41.3122842Z Cache restored successfully
+2026-11-24T11:00:41.3140382Z Restored cache entry with key gradle-home-v1|Linux-X64|build-apk[c585a5624ecd68c767cac3aa9db97875]-9b6c4246108e928a40297835752038dee5dcc4dc to /home/runner/.gradle/caches,/home/runner/.gradle/notifications,/home/runner/.gradle/.setup-gradle in 1892ms
+2026-11-24T11:00:41.5812412Z Cache hit for: gradle-instrumented-jars-v1-cb254b5fb5af5e8947d560585deb4928
+2026-11-24T11:00:41.5920867Z Cache hit for: gradle-generated-gradle-jars-v1-cb4b032a7d08b9bf1e84e9eacaebcc29
+2026-11-24T11:00:41.5924696Z Cache hit for: gradle-kotlin-dsl-v1-56a5c826323e0dea7cf4e21811bc1ed7
+2026-11-24T11:00:41.5927645Z Cache hit for: gradle-dependencies-v1-431da3362d37b2152e7a70177904ecc1
+2026-11-24T11:00:41.6077567Z Cache hit for: gradle-transforms-v1-d314f2920a58769b1458569e4171878c
+2026-11-24T11:00:41.6081845Z Cache hit for: gradle-groovy-dsl-v1-aae925427c38b5c78ca9b9ba018ffb61
+2026-11-24T11:00:41.7545064Z Received 92002 of 92002 (100.0%), 1.0 MBs/sec
+2026-11-24T11:00:41.7546064Z Cache Size: ~0 MB (92002 B)
+2026-11-24T11:00:41.7569002Z [command]/usr/bin/tar -xf /home/runner/work/_temp/30bb3640-ef12-4a9c-8112-11e434df8524/cache.tzst -P -C /home/runner/work/git-note/git-note --use-compress-program unzstd
+2026-11-24T11:00:41.7899708Z Cache restored successfully
+2026-11-24T11:00:41.7905382Z Restored cache entry with key gradle-kotlin-dsl-v1-56a5c826323e0dea7cf4e21811bc1ed7 to /home/runner/.gradle/caches/*/kotlin-dsl/accessors/*/,/home/runner/.gradle/caches/*/kotlin-dsl/scripts/*/ in 475ms
+2026-11-24T11:00:42.3551637Z Received 64461 of 64461 (100.0%), 0.1 MBs/sec
+2026-11-24T11:00:42.3552525Z Cache Size: ~0 MB (64461 B)
+2026-11-24T11:00:42.3574088Z [command]/usr/bin/tar -xf /home/runner/work/_temp/4f4a3f89-cfd4-4241-86c5-c3865262ce35/cache.tzst -P -C /home/runner/work/git-note/git-note --use-compress-program unzstd
+2026-11-24T11:00:42.3651145Z Received 97170 of 97170 (100.0%), 0.2 MBs/sec
+2026-11-24T11:00:42.3652247Z Cache Size: ~0 MB (97170 B)
+2026-11-24T11:00:42.3677479Z [command]/usr/bin/tar -xf /home/runner/work/_temp/cbfe3fe2-182c-490f-a0a8-74043e6d520b/cache.tzst -P -C /home/runner/work/git-note/git-note --use-compress-program unzstd
+2026-11-24T11:00:42.3729499Z Cache restored successfully
+2026-11-24T11:00:42.3734526Z Restored cache entry with key gradle-instrumented-jars-v1-cb254b5fb5af5e8947d560585deb4928 to /home/runner/.gradle/caches/jars-*/*/ in 1058ms
+2026-11-24T11:00:42.3846918Z Cache restored successfully
+2026-11-24T11:00:42.3848520Z Restored cache entry with key gradle-groovy-dsl-v1-aae925427c38b5c78ca9b9ba018ffb61 to /home/runner/.gradle/caches/*/groovy-dsl/*/ in 1068ms
+2026-11-24T11:00:42.8770307Z Received 12582912 of 196219908 (6.4%), 11.9 MBs/sec
+2026-11-24T11:00:42.8954786Z Received 0 of 41993403 (0.0%), 0.0 MBs/sec
+2026-11-24T11:00:42.9045772Z Received 12582912 of 345150406 (3.6%), 12.0 MBs/sec
+2026-11-24T11:00:43.2754616Z Received 41993403 of 41993403 (100.0%), 28.9 MBs/sec
+2026-11-24T11:00:43.2758050Z Cache Size: ~40 MB (41993403 B)
+2026-11-24T11:00:43.2833088Z [command]/usr/bin/tar -xf /home/runner/work/_temp/a37ada88-b5b6-4a08-82b4-68639ad56bcc/cache.tzst -P -C /home/runner/work/git-note/git-note --use-compress-program unzstd
+2026-11-24T11:00:43.7183890Z Cache restored successfully
+2026-11-24T11:00:43.7275227Z Restored cache entry with key gradle-generated-gradle-jars-v1-cb4b032a7d08b9bf1e84e9eacaebcc29 to /home/runner/.gradle/caches/9.3.1/generated-gradle-jars/gradle-api-9.3.1.jar in 2412ms
+2026-11-24T11:00:43.8789524Z Received 134217728 of 196219908 (68.4%), 63.7 MBs/sec
+2026-11-24T11:00:43.9047235Z Received 130023424 of 345150406 (37.7%), 62.0 MBs/sec
+2026-11-24T11:00:44.6002938Z Received 196219908 of 196219908 (100.0%), 68.5 MBs/sec
+2026-11-24T11:00:44.6005940Z Cache Size: ~187 MB (196219908 B)
+2026-11-24T11:00:44.6251188Z [command]/usr/bin/tar -xf /home/runner/work/_temp/df50b7cb-1636-4959-aac8-8129f4e89ff8/cache.tzst -P -C /home/runner/work/git-note/git-note --use-compress-program unzstd
+2026-11-24T11:00:44.9054287Z Received 260046848 of 345150406 (75.3%), 82.6 MBs/sec
+2026-11-24T11:00:45.5989509Z Received 345150406 of 345150406 (100.0%), 89.1 MBs/sec
+2026-11-24T11:00:45.5992254Z Cache Size: ~329 MB (345150406 B)
+2026-11-24T11:00:45.6216673Z [command]/usr/bin/tar -xf /home/runner/work/_temp/43bef7d9-6ae0-4da8-8741-87ee7fc51d78/cache.tzst -P -C /home/runner/work/git-note/git-note --use-compress-program unzstd
+2026-11-24T11:00:46.4260155Z Cache restored successfully
+2026-11-24T11:00:46.4440924Z Restored cache entry with key gradle-dependencies-v1-431da3362d37b2152e7a70177904ecc1 to /home/runner/.gradle/caches/modules-*/files-*/*/*/*/* in 5128ms
+2026-11-24T11:00:46.4557262Z Cache restored successfully
+2026-11-24T11:00:46.4639130Z Restored cache entry with key gradle-transforms-v1-d314f2920a58769b1458569e4171878c to /home/runner/.gradle/caches/transforms-4/*/,/home/runner/.gradle/caches/*/transforms/*/ in 5147ms
+2026-11-24T11:00:46.4730412Z ##[endgroup]
+2026-11-24T11:00:46.4784458Z ##[group]All Gradle Wrapper jars are valid
+2026-11-24T11:00:46.4785284Z 
+2026-11-24T11:00:46.4785767Z ##[endgroup]
+2026-11-24T11:00:46.5541862Z ##[group]Provision Gradle 9.3.1
+2026-11-24T11:00:49.6700603Z Cache hit for: gradle-9.3.1
+2026-11-24T11:00:50.9366162Z Received 25165824 of 136943103 (18.4%), 24.0 MBs/sec
+2026-11-24T11:00:51.9360056Z Received 134217728 of 136943103 (98.0%), 64.0 MBs/sec
+2026-11-24T11:00:51.9698067Z Received 136943103 of 136943103 (100.0%), 64.2 MBs/sec
+2026-11-24T11:00:51.9700668Z Cache Size: ~131 MB (136943103 B)
+2026-11-24T11:00:51.9729037Z [command]/usr/bin/tar -xf /home/runner/work/_temp/2a86b9c4-bd4e-4391-856a-64129eaeb1ba/cache.tzst -P -C /home/runner/work/git-note/git-note --use-compress-program unzstd
+2026-11-24T11:00:52.1717699Z Cache restored successfully
+2026-11-24T11:00:52.1777203Z Restored Gradle distribution gradle-9.3.1 from cache to /home/runner/work/_temp/.gradle-actions/gradle-installations/downloads/gradle-9.3.1-bin.zip
+2026-11-24T11:00:52.1795864Z [command]/usr/bin/unzip -o -q /home/runner/work/_temp/.gradle-actions/gradle-installations/downloads/gradle-9.3.1-bin.zip
+2026-11-24T11:00:53.3068316Z Extracted Gradle 9.3.1 to /home/runner/work/_temp/.gradle-actions/gradle-installations/installs/gradle-9.3.1
+2026-11-24T11:00:53.3069999Z Provisioned Gradle executable /home/runner/work/_temp/.gradle-actions/gradle-installations/installs/gradle-9.3.1/bin/gradle
+2026-11-24T11:00:53.3071854Z ##[endgroup]
+2026-11-24T11:00:53.3388188Z ##[group]Run # NEVER generate a random keystore in CI, otherwise the signature changes on every
+2026-11-24T11:00:53.3389004Z [36;1m# NEVER generate a random keystore in CI, otherwise the signature changes on every[0m
+2026-11-24T11:00:53.3389830Z [36;1m# build and overwrite-installing updates on Xiaomi 14 Pro will fail![0m
+2026-11-24T11:00:53.3390287Z [36;1m[0m
+2026-11-24T11:00:53.3390754Z [36;1m# 1. Fixed Debug keystore: from repo file debug.keystore.base64 OR GitHub Secret DEBUG_KEYSTORE_BASE64[0m
+2026-11-24T11:00:53.3391357Z [36;1mif [ -f "debug.keystore.base64" ]; then[0m
+2026-11-24T11:00:53.3391814Z [36;1m  tr -d '\n\r ' < debug.keystore.base64 | base64 -d > debug.keystore[0m
+2026-11-24T11:00:53.3392300Z [36;1m  echo "has_debug_keystore=true" >> "$GITHUB_OUTPUT"[0m
+2026-11-24T11:00:53.3392854Z [36;1m  echo "Decoded fixed debug.keystore from repository file debug.keystore.base64"[0m
+2026-11-24T11:00:53.3393751Z [36;1melif [ -n "$DEBUG_KEYSTORE_BASE64" ]; then[0m
+2026-11-24T11:00:53.3394272Z [36;1m  printf '%s' "$DEBUG_KEYSTORE_BASE64" | tr -d '\n\r ' | base64 -d > debug.keystore[0m
+2026-11-24T11:00:53.3394816Z [36;1m  echo "has_debug_keystore=true" >> "$GITHUB_OUTPUT"[0m
+2026-11-24T11:00:53.3395384Z [36;1m  echo "Decoded fixed debug.keystore from GitHub Secret DEBUG_KEYSTORE_BASE64"[0m
+2026-11-24T11:00:53.3395853Z [36;1melse[0m
+2026-11-24T11:00:53.3396172Z [36;1m  echo "has_debug_keystore=false" >> "$GITHUB_OUTPUT"[0m
+2026-11-24T11:00:53.3396800Z [36;1m  echo "No fixed debug keystore found (neither debug.keystore.base64 nor DEBUG_KEYSTORE_BASE64 secret)."[0m
+2026-11-24T11:00:53.3397346Z [36;1mfi[0m
+2026-11-24T11:00:53.3397574Z [36;1m[0m
+2026-11-24T11:00:53.3398033Z [36;1m# 2. Fixed Release keystore: from GitHub Secrets KEYSTORE_BASE64 + STORE_PASSWORD + KEY_PASSWORD[0m
+2026-11-24T11:00:53.3398732Z [36;1mif [ -n "$KEYSTORE_BASE64" ] && [ -n "$STORE_PASSWORD" ] && [ -n "$KEY_PASSWORD" ]; then[0m
+2026-11-24T11:00:53.3399367Z [36;1m  printf '%s' "$KEYSTORE_BASE64" | tr -d '\n\r ' | base64 -d > my-upload-key.jks[0m
+2026-11-24T11:00:53.3399921Z [36;1m  echo "has_release_keystore=true" >> "$GITHUB_OUTPUT"[0m
+2026-11-24T11:00:53.3400459Z [36;1m  echo "Decoded fixed release keystore (my-upload-key.jks) from GitHub Secrets"[0m
+2026-11-24T11:00:53.3400958Z [36;1melse[0m
+2026-11-24T11:00:53.3401279Z [36;1m  echo "has_release_keystore=false" >> "$GITHUB_OUTPUT"[0m
+2026-11-24T11:00:53.3401729Z [36;1m  echo "Release keystore secrets not configured."[0m
+2026-11-24T11:00:53.3402094Z [36;1mfi[0m
+2026-11-24T11:00:53.3434985Z shell: /usr/bin/bash -e {0}
+2026-11-24T11:00:53.3435295Z env:
+2026-11-24T11:00:53.3435674Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:00:53.3436241Z   JAVA_HOME_21_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:00:53.3436732Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2026-11-24T11:00:53.3437097Z   GRADLE_USER_HOME: /home/runner/.gradle
+2026-11-24T11:00:53.3437442Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2026-11-24T11:00:53.3437791Z   GRADLE_BUILD_ACTION_CACHE_RESTORED: true
+2026-11-24T11:00:53.3438293Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2026-11-24T11:00:53.3438840Z   DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+2026-11-24T11:00:53.3439212Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2026-11-24T11:00:53.3458273Z   DEBUG_KEYSTORE_BASE64: ***
+2026-11-24T11:00:53.3458592Z   KEYSTORE_BASE64: 
+2026-11-24T11:00:53.3458850Z   STORE_PASSWORD: 
+2026-11-24T11:00:53.3459099Z   KEY_PASSWORD: 
+2026-11-24T11:00:53.3459352Z ##[endgroup]
+2026-11-24T11:00:53.3555674Z Decoded fixed debug.keystore from GitHub Secret DEBUG_KEYSTORE_BASE64
+2026-11-24T11:00:53.3556505Z Release keystore secrets not configured.
+2026-11-24T11:00:53.3610941Z ##[group]Run BUILD_DEBUG=false
+2026-11-24T11:00:53.3611373Z [36;1mBUILD_DEBUG=false[0m
+2026-11-24T11:00:53.3611677Z [36;1mBUILD_RELEASE=false[0m
+2026-11-24T11:00:53.3611960Z [36;1m[0m
+2026-11-24T11:00:53.3612307Z [36;1mif [ "$HAS_DEBUG" != "true" ] && [ "$HAS_RELEASE" != "true" ]; then[0m
+2026-11-24T11:00:53.3614095Z [36;1m  echo "::error::No fixed signing keystore configured! To keep the APK signature fixed for overwrite updates, add GitHub Secret DEBUG_KEYSTORE_BASE64 (copy contents of debug.keystore.base64 from AI Studio) OR add Release secrets KEYSTORE_BASE64, STORE_PASSWORD, KEY_PASSWORD (keyAlias 'upload') in Settings -> Secrets and variables -> Actions."[0m
+2026-11-24T11:00:53.3615698Z [36;1m  exit 1[0m
+2026-11-24T11:00:53.3615946Z [36;1mfi[0m
+2026-11-24T11:00:53.3616175Z [36;1m[0m
+2026-11-24T11:00:53.3616467Z [36;1mif [ "$EVENT_NAME" = "workflow_dispatch" ]; then[0m
+2026-11-24T11:00:53.3616863Z [36;1m  case "$INPUT_BUILD_TYPE" in[0m
+2026-11-24T11:00:53.3617211Z [36;1m    auto)[0m
+2026-11-24T11:00:53.3617505Z [36;1m      if [ "$HAS_RELEASE" = "true" ]; then[0m
+2026-11-24T11:00:53.3617856Z [36;1m        BUILD_RELEASE=true[0m
+2026-11-24T11:00:53.3618170Z [36;1m      else[0m
+2026-11-24T11:00:53.3618437Z [36;1m        BUILD_DEBUG=true[0m
+2026-11-24T11:00:53.3618735Z [36;1m      fi[0m
+2026-11-24T11:00:53.3619049Z [36;1m      ;;[0m
+2026-11-24T11:00:53.3619316Z [36;1m    debug)[0m
+2026-11-24T11:00:53.3619610Z [36;1m      if [ "$HAS_DEBUG" != "true" ]; then[0m
+2026-11-24T11:00:53.3620245Z [36;1m        echo "::error::Debug build requires debug.keystore.base64 in repo or GitHub Secret DEBUG_KEYSTORE_BASE64."[0m
+2026-11-24T11:00:53.3620833Z [36;1m        exit 1[0m
+2026-11-24T11:00:53.3621102Z [36;1m      fi[0m
+2026-11-24T11:00:53.3621363Z [36;1m      BUILD_DEBUG=true[0m
+2026-11-24T11:00:53.3621657Z [36;1m      ;;[0m
+2026-11-24T11:00:53.3621904Z [36;1m    release)[0m
+2026-11-24T11:00:53.3622216Z [36;1m      if [ "$HAS_RELEASE" != "true" ]; then[0m
+2026-11-24T11:00:53.3622935Z [36;1m        echo "::error::Release build requires fixed GitHub Secrets: KEYSTORE_BASE64, STORE_PASSWORD, and KEY_PASSWORD (keyAlias must be 'upload')."[0m
+2026-11-24T11:00:53.3624047Z [36;1m        exit 1[0m
+2026-11-24T11:00:53.3624316Z [36;1m      fi[0m
+2026-11-24T11:00:53.3624571Z [36;1m      BUILD_RELEASE=true[0m
+2026-11-24T11:00:53.3624863Z [36;1m      ;;[0m
+2026-11-24T11:00:53.3625117Z [36;1m    both)[0m
+2026-11-24T11:00:53.3625398Z [36;1m      if [ "$HAS_DEBUG" = "true" ]; then[0m
+2026-11-24T11:00:53.3625745Z [36;1m        BUILD_DEBUG=true[0m
+2026-11-24T11:00:53.3626034Z [36;1m      else[0m
+2026-11-24T11:00:53.3626448Z [36;1m        echo "::warning::Fixed debug keystore not configured; skipping Debug APK."[0m
+2026-11-24T11:00:53.3638168Z [36;1m      fi[0m
+2026-11-24T11:00:53.3638532Z [36;1m      if [ "$HAS_RELEASE" = "true" ]; then[0m
+2026-11-24T11:00:53.3638896Z [36;1m        BUILD_RELEASE=true[0m
+2026-11-24T11:00:53.3639217Z [36;1m      else[0m
+2026-11-24T11:00:53.3639654Z [36;1m        echo "::warning::Release keystore secrets not configured; skipping Release APK."[0m
+2026-11-24T11:00:53.3640135Z [36;1m      fi[0m
+2026-11-24T11:00:53.3640378Z [36;1m      ;;[0m
+2026-11-24T11:00:53.3640614Z [36;1m  esac[0m
+2026-11-24T11:00:53.3640911Z [36;1melif [[ "$GITHUB_REF" == refs/tags/v* ]]; then[0m
+2026-11-24T11:00:53.3641312Z [36;1m  if [ "$HAS_RELEASE" = "true" ]; then[0m
+2026-11-24T11:00:53.3641659Z [36;1m    BUILD_RELEASE=true[0m
+2026-11-24T11:00:53.3641944Z [36;1m  fi[0m
+2026-11-24T11:00:53.3642210Z [36;1m  if [ "$HAS_DEBUG" = "true" ]; then[0m
+2026-11-24T11:00:53.3642546Z [36;1m    BUILD_DEBUG=true[0m
+2026-11-24T11:00:53.3642827Z [36;1m  fi[0m
+2026-11-24T11:00:53.3643058Z [36;1melse[0m
+2026-11-24T11:00:53.3643571Z [36;1m  if [ "$HAS_RELEASE" = "true" ]; then[0m
+2026-11-24T11:00:53.3643915Z [36;1m    BUILD_RELEASE=true[0m
+2026-11-24T11:00:53.3644200Z [36;1m  else[0m
+2026-11-24T11:00:53.3644667Z [36;1m    BUILD_DEBUG=true[0m
+2026-11-24T11:00:53.3644957Z [36;1m  fi[0m
+2026-11-24T11:00:53.3645190Z [36;1mfi[0m
+2026-11-24T11:00:53.3645419Z [36;1m[0m
+2026-11-24T11:00:53.3645732Z [36;1mecho "build_debug=$BUILD_DEBUG" >> "$GITHUB_OUTPUT"[0m
+2026-11-24T11:00:53.3646200Z [36;1mecho "build_release=$BUILD_RELEASE" >> "$GITHUB_OUTPUT"[0m
+2026-11-24T11:00:53.3646580Z [36;1m[0m
+2026-11-24T11:00:53.3646862Z [36;1mAPP_VERSION_CODE="${GITHUB_RUN_NUMBER:-1}"[0m
+2026-11-24T11:00:53.3647380Z [36;1mif [[ "$GITHUB_REF" == refs/tags/v* ]]; then[0m
+2026-11-24T11:00:53.3647769Z [36;1m  APP_VERSION_NAME="${GITHUB_REF#refs/tags/v}"[0m
+2026-11-24T11:00:53.3648115Z [36;1melse[0m
+2026-11-24T11:00:53.3648396Z [36;1m  APP_VERSION_NAME="1.0.${APP_VERSION_CODE}"[0m
+2026-11-24T11:00:53.3648723Z [36;1mfi[0m
+2026-11-24T11:00:53.3649061Z [36;1mecho "app_version_code=$APP_VERSION_CODE" >> "$GITHUB_OUTPUT"[0m
+2026-11-24T11:00:53.3649563Z [36;1mecho "app_version_name=$APP_VERSION_NAME" >> "$GITHUB_OUTPUT"[0m
+2026-11-24T11:00:53.3650181Z [36;1mecho "Resolved APK version: versionName=${APP_VERSION_NAME}, versionCode=${APP_VERSION_CODE}"[0m
+2026-11-24T11:00:53.3682399Z shell: /usr/bin/bash -e {0}
+2026-11-24T11:00:53.3682698Z env:
+2026-11-24T11:00:53.3683068Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:00:53.3683875Z   JAVA_HOME_21_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:00:53.3684358Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2026-11-24T11:00:53.3684749Z   GRADLE_USER_HOME: /home/runner/.gradle
+2026-11-24T11:00:53.3685090Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2026-11-24T11:00:53.3685440Z   GRADLE_BUILD_ACTION_CACHE_RESTORED: true
+2026-11-24T11:00:53.3685937Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2026-11-24T11:00:53.3686499Z   DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+2026-11-24T11:00:53.3686887Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2026-11-24T11:00:53.3687222Z   INPUT_BUILD_TYPE: 
+2026-11-24T11:00:53.3687514Z   HAS_DEBUG: true
+2026-11-24T11:00:53.3687768Z   HAS_RELEASE: false
+2026-11-24T11:00:53.3688024Z   EVENT_NAME: push
+2026-11-24T11:00:53.3688292Z   GITHUB_REF: refs/heads/main
+2026-11-24T11:00:53.3688581Z ##[endgroup]
+2026-11-24T11:00:53.3745993Z Resolved APK version: versionName=1.0.12, versionCode=12
+2026-11-24T11:00:53.3785360Z ##[group]Run gradle :app:assembleDebug --no-daemon --stacktrace
+2026-11-24T11:00:53.3785920Z [36;1mgradle :app:assembleDebug --no-daemon --stacktrace[0m
+2026-11-24T11:00:53.3820443Z shell: /usr/bin/bash -e {0}
+2026-11-24T11:00:53.3820755Z env:
+2026-11-24T11:00:53.3821119Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:00:53.3821710Z   JAVA_HOME_21_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:00:53.3822190Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2026-11-24T11:00:53.3822552Z   GRADLE_USER_HOME: /home/runner/.gradle
+2026-11-24T11:00:53.3822898Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2026-11-24T11:00:53.3823523Z   GRADLE_BUILD_ACTION_CACHE_RESTORED: true
+2026-11-24T11:00:53.3824226Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2026-11-24T11:00:53.3824774Z   DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+2026-11-24T11:00:53.3825186Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2026-11-24T11:00:53.3825511Z   APP_VERSION_CODE: 12
+2026-11-24T11:00:53.3825783Z   APP_VERSION_NAME: 1.0.12
+2026-11-24T11:00:53.3826088Z ##[endgroup]
+2026-11-24T11:00:54.2539980Z To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+2026-11-24T11:00:55.5512846Z Daemon will be stopped at the end of the build 
+2026-11-24T11:00:57.4502996Z Calculating task graph as no cached configuration is available for tasks: :app:assembleDebug
+2026-11-24T11:01:15.3514385Z > Task :app:preBuild UP-TO-DATE
+2026-11-24T11:01:15.3530902Z > Task :app:generateDebugAssets UP-TO-DATE
+2026-11-24T11:01:15.3531333Z > Task :app:preDebugBuild UP-TO-DATE
+2026-11-24T11:01:15.3531728Z > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+2026-11-24T11:01:15.4516746Z > Task :app:processDebugGoogleServices FROM-CACHE
+2026-11-24T11:01:15.4584410Z > Task :app:generateDebugResources FROM-CACHE
+2026-11-24T11:01:15.4585544Z > Task :app:generateDebugBuildConfig
+2026-11-24T11:01:15.4586910Z > Task :app:javaPreCompileDebug FROM-CACHE
+2026-11-24T11:01:15.5530064Z > Task :app:packageDebugResources FROM-CACHE
+2026-11-24T11:01:16.0502812Z > Task :app:processDebugNavigationResources FROM-CACHE
+2026-11-24T11:01:16.0503737Z > Task :app:mergeDebugAssets
+2026-11-24T11:01:16.0508677Z > Task :app:compressDebugAssets FROM-CACHE
+2026-11-24T11:01:16.0509632Z > Task :app:desugarDebugFileDependencies FROM-CACHE
+2026-11-24T11:01:18.8519733Z > Task :app:parseDebugLocalResources FROM-CACHE
+2026-11-24T11:01:18.8520611Z > Task :app:generateDebugRFile FROM-CACHE
+2026-11-24T11:01:18.8551159Z > Task :app:mapDebugSourceSetPaths
+2026-11-24T11:01:18.8552276Z > Task :app:compileDebugNavigationResources FROM-CACHE
+2026-11-24T11:01:19.3524381Z > Task :app:checkDebugAarMetadata
+2026-11-24T11:01:19.3533996Z > Task :app:createDebugCompatibleScreenManifests
+2026-11-24T11:01:19.3535241Z > Task :app:checkDebugDuplicateClasses
+2026-11-24T11:01:19.4504407Z > Task :app:extractDeepLinksDebug FROM-CACHE
+2026-11-24T11:01:19.4520809Z > Task :app:mergeLibDexDebug FROM-CACHE
+2026-11-24T11:01:30.2514252Z > Task :app:processDebugMainManifest
+2026-11-24T11:01:30.5503661Z > Task :app:processDebugManifest
+2026-11-24T11:01:30.5534058Z > Task :app:processDebugManifestForPackage
+2026-11-24T11:01:30.5619358Z > Task :app:mergeDebugJniLibFolders
+2026-11-24T11:01:30.6515106Z > Task :app:mergeDebugResources
+2026-11-24T11:01:31.0524484Z > Task :app:mergeDebugNativeLibs
+2026-11-24T11:01:31.7533740Z 
+2026-11-24T11:01:31.7564132Z > Task :app:stripDebugDebugSymbols
+2026-11-24T11:01:31.7594745Z Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libdatastore_shared_counter.so. Run with --info option to learn more.
+2026-11-24T11:01:31.7596046Z 
+2026-11-24T11:01:31.7596260Z > Task :app:validateSigningDebug
+2026-11-24T11:01:31.7596824Z > Task :app:writeDebugAppMetadata
+2026-11-24T11:01:31.8554932Z > Task :app:writeDebugSigningConfigVersions
+2026-11-24T11:01:31.9554294Z > Task :app:processDebugResources
+2026-11-24T11:01:34.4524390Z > Task :app:kspDebugKotlin
+2026-11-24T11:01:46.2504292Z > Task :app:mergeExtDexDebug
+2026-11-24T11:02:04.4517975Z > Task :app:compileDebugKotlin
+2026-11-24T11:02:06.3535571Z w: file:///home/runner/work/git-note/git-note/app/src/main/java/com/example/ui/GitNoteApp.kt:367:46 'val Icons.Outlined.MenuBook: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Outlined.MenuBook.
+2026-11-24T11:02:06.3565184Z w: file:///home/runner/work/git-note/git-note/app/src/main/java/com/example/ui/components/GitNoteSheets.kt:514:54 'val Icons.Outlined.Logout: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Outlined.Logout.
+2026-11-24T11:02:06.3594413Z w: file:///home/runner/work/git-note/git-note/app/src/main/java/com/example/ui/markdown/MarkdownPreview.kt:112:21 Expression is unused.
+2026-11-24T11:02:06.3605797Z w: file:///home/runner/work/git-note/git-note/app/src/main/java/com/example/ui/markdown/MarkdownPreview.kt:739:100 'val Icons.Rounded.KeyboardArrowRight: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Rounded.KeyboardArrowRight.
+2026-11-24T11:02:06.3622128Z w: file:///home/runner/work/git-note/git-note/app/src/main/java/com/example/ui/screens/BrowserScreen.kt:268:66 'val Icons.Outlined.NoteAdd: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Outlined.NoteAdd.
+2026-11-24T11:02:06.3665228Z w: file:///home/runner/work/git-note/git-note/app/src/main/java/com/example/ui/screens/BrowserScreen.kt:795:46 'val Icons.Outlined.NoteAdd: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Outlined.NoteAdd.
+2026-11-24T11:02:06.3695358Z w: file:///home/runner/work/git-note/git-note/app/src/main/java/com/example/ui/screens/SetupScreen.kt:331:58 'val Icons.Outlined.HelpOutline: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Outlined.HelpOutline.
+2026-11-24T11:02:07.6533663Z 
+2026-11-24T11:02:07.6564341Z > Task :app:processDebugJavaRes
+2026-11-24T11:02:09.6507871Z > Task :app:mergeDebugJavaResource
+2026-11-24T11:02:11.1504894Z > Task :app:compileDebugJavaWithJavac
+2026-11-24T11:02:16.9503662Z > Task :app:dexBuilderDebug
+2026-11-24T11:02:17.3523484Z > Task :app:mergeProjectDexDebug
+2026-11-24T11:02:18.4544567Z > Task :app:packageDebug
+2026-11-24T11:02:18.4545818Z > Task :app:assembleDebug
+2026-11-24T11:02:18.4573944Z > Task :app:createDebugApkListingFileRedirect
+2026-11-24T11:02:18.5525055Z gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1795518058497.json
+2026-11-24T11:02:18.5526080Z 
+2026-11-24T11:02:18.5530598Z [Incubating] Problems report is available at: file:///home/runner/work/git-note/git-note/build/reports/problems/problems-report.html
+2026-11-24T11:02:18.5564700Z 
+2026-11-24T11:02:18.5565211Z BUILD SUCCESSFUL in 1m 25s
+2026-11-24T11:02:18.5566101Z 39 actionable tasks: 27 executed, 12 from cache
+2026-11-24T11:02:18.5566958Z Configuration cache entry stored.
+2026-11-24T11:02:18.9426701Z ##[group]Run mkdir -p dist
+2026-11-24T11:02:18.9427131Z [36;1mmkdir -p dist[0m
+2026-11-24T11:02:18.9427472Z [36;1mif [ "$GITHUB_REF_TYPE" = "tag" ]; then[0m
+2026-11-24T11:02:18.9427862Z [36;1m  VERSION_SUFFIX="$GITHUB_REF_NAME"[0m
+2026-11-24T11:02:18.9428226Z [36;1melse[0m
+2026-11-24T11:02:18.9428546Z [36;1m  VERSION_SUFFIX="build-${GITHUB_RUN_NUMBER}"[0m
+2026-11-24T11:02:18.9428906Z [36;1mfi[0m
+2026-11-24T11:02:18.9429147Z [36;1m[0m
+2026-11-24T11:02:18.9429655Z [36;1mAPKSIGNER="$(find "${ANDROID_HOME}/build-tools" -name apksigner 2>/dev/null | sort -V | tail -n 1 || true)"[0m
+2026-11-24T11:02:18.9430223Z [36;1m[0m
+2026-11-24T11:02:18.9430561Z [36;1mif [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then[0m
+2026-11-24T11:02:18.9431059Z [36;1m  DEBUG_APK="dist/GitNote-${VERSION_SUFFIX}-debug.apk"[0m
+2026-11-24T11:02:18.9431560Z [36;1m  cp app/build/outputs/apk/debug/app-debug.apk "$DEBUG_APK"[0m
+2026-11-24T11:02:18.9432018Z [36;1m  if [ -n "$APKSIGNER" ]; then[0m
+2026-11-24T11:02:18.9432446Z [36;1m    "$APKSIGNER" verify --verbose --print-certs "$DEBUG_APK"[0m
+2026-11-24T11:02:18.9432848Z [36;1m  fi[0m
+2026-11-24T11:02:18.9433089Z [36;1mfi[0m
+2026-11-24T11:02:18.9433721Z [36;1m[0m
+2026-11-24T11:02:18.9434094Z [36;1mif [ -f "app/build/outputs/apk/release/app-release.apk" ]; then[0m
+2026-11-24T11:02:18.9434625Z [36;1m  RELEASE_APK="dist/GitNote-${VERSION_SUFFIX}-release.apk"[0m
+2026-11-24T11:02:18.9435148Z [36;1m  cp app/build/outputs/apk/release/app-release.apk "$RELEASE_APK"[0m
+2026-11-24T11:02:18.9435599Z [36;1m  if [ -n "$APKSIGNER" ]; then[0m
+2026-11-24T11:02:18.9436025Z [36;1m    "$APKSIGNER" verify --verbose --print-certs "$RELEASE_APK"[0m
+2026-11-24T11:02:18.9436432Z [36;1m  fi[0m
+2026-11-24T11:02:18.9436674Z [36;1mfi[0m
+2026-11-24T11:02:18.9436907Z [36;1m[0m
+2026-11-24T11:02:18.9437152Z [36;1mls -lh dist/[0m
+2026-11-24T11:02:18.9469535Z shell: /usr/bin/bash -e {0}
+2026-11-24T11:02:18.9469851Z env:
+2026-11-24T11:02:18.9470236Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:02:18.9470824Z   JAVA_HOME_21_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:02:18.9471318Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2026-11-24T11:02:18.9471682Z   GRADLE_USER_HOME: /home/runner/.gradle
+2026-11-24T11:02:18.9472024Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2026-11-24T11:02:18.9472390Z   GRADLE_BUILD_ACTION_CACHE_RESTORED: true
+2026-11-24T11:02:18.9472891Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2026-11-24T11:02:18.9473854Z   DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+2026-11-24T11:02:18.9474424Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2026-11-24T11:02:18.9474750Z   GITHUB_REF_NAME: main
+2026-11-24T11:02:18.9475023Z   GITHUB_REF_TYPE: branch
+2026-11-24T11:02:18.9475299Z   GITHUB_RUN_NUMBER: 12
+2026-11-24T11:02:18.9475577Z ##[endgroup]
+2026-11-24T11:02:19.3950530Z Verifies
+2026-11-24T11:02:19.3951532Z Verified using v1 scheme (JAR signing): false
+2026-11-24T11:02:19.3953145Z Verified using v2 scheme (APK Signature Scheme v2): true
+2026-11-24T11:02:19.3954469Z Verified using v3 scheme (APK Signature Scheme v3): false
+2026-11-24T11:02:19.3955583Z Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+2026-11-24T11:02:19.3956479Z Verified using v3.2 scheme (APK Signature Scheme v3.2): false
+2026-11-24T11:02:19.3957300Z Verified using v4 scheme (APK Signature Scheme v4): false
+2026-11-24T11:02:19.3957989Z Verified for SourceStamp: false
+2026-11-24T11:02:19.3958702Z Number of signers: 1
+2026-11-24T11:02:19.3989143Z V2 Signer: certificate DN: CN=Android Debug, O=Android, C=US
+2026-11-24T11:02:19.3993671Z V2 Signer: certificate SHA-256 digest: 6891fc607a124a9d7a04ca108b86b0e225488c8b8b8448879f8e3f33dfb26a2d
+2026-11-24T11:02:19.3998707Z V2 Signer: certificate SHA-1 digest: 7aeab30fe4fffa91a2e0412b4ab515795fef34b6
+2026-11-24T11:02:19.4003641Z V2 Signer: certificate MD5 digest: ee752949fb890445166d791d5b256658
+2026-11-24T11:02:19.4005237Z V2 Signer: key algorithm: RSA
+2026-11-24T11:02:19.4006107Z V2 Signer: key size (bits): 2048
+2026-11-24T11:02:19.4008999Z V2 Signer: public key SHA-256 digest: 4a001e38fb61dd6badb3928f934686cb73ddd11bafc3c1d1dcd36aa908a8f6dc
+2026-11-24T11:02:19.4010568Z V2 Signer: public key SHA-1 digest: aa70bade7cdc1563823fda15f65bc9814319a7cc
+2026-11-24T11:02:19.4011715Z V2 Signer: public key MD5 digest: 25833a527a0aac6521fca37b0e977ba4
+2026-11-24T11:02:19.4242783Z total 21M
+2026-11-24T11:02:19.4243811Z -rw-r--r-- 1 runner runner 21M Nov 24 11:02 GitNote-build-12-debug.apk
+2026-11-24T11:02:19.4288482Z ##[group]Run shopt -s nullglob
+2026-11-24T11:02:19.4300451Z [36;1mshopt -s nullglob[0m
+2026-11-24T11:02:19.4301429Z [36;1mAPKSIGNER="$(find "${ANDROID_HOME}/build-tools" -name apksigner 2>/dev/null | sort -V | tail -n 1 || true)"[0m
+2026-11-24T11:02:19.4302031Z [36;1m{[0m
+2026-11-24T11:02:19.4302333Z [36;1m  echo "## GitNote Android APK Build Summary"[0m
+2026-11-24T11:02:19.4302694Z [36;1m  echo ""[0m
+2026-11-24T11:02:19.4303083Z [36;1m  echo "- **Application ID**: \`com.aistudio.gitnote.xmkpzr\`"[0m
+2026-11-24T11:02:19.4304223Z [36;1m  echo "- **Target Device Compatibility**: Xiaomi 14 Pro (Snapdragon 8 Gen 3 / \`arm64-v8a\`, HyperOS / Android 14+)"[0m
+2026-11-24T11:02:19.4304912Z [36;1m  echo "- **SDK**: \`minSdk 24\`, \`targetSdk 36\`, \`compileSdk 36.1\`"[0m
+2026-11-24T11:02:19.4305329Z [36;1m  echo ""[0m
+2026-11-24T11:02:19.4305598Z [36;1m  APKS=(dist/*.apk)[0m
+2026-11-24T11:02:19.4305910Z [36;1m  if [ "${#APKS[@]}" -gt 0 ]; then[0m
+2026-11-24T11:02:19.4306293Z [36;1m    echo "### Generated APKs"[0m
+2026-11-24T11:02:19.4306779Z [36;1m    echo "| File | Size | Cert SHA-256 (fixed for overwrite updates) | File SHA-256 |"[0m
+2026-11-24T11:02:19.4307382Z [36;1m    echo "|------|------|--------------------------------------------|--------------|"[0m
+2026-11-24T11:02:19.4307816Z [36;1m    for f in "${APKS[@]}"; do[0m
+2026-11-24T11:02:19.4308150Z [36;1m      SIZE="$(du -h "$f" | cut -f1)"[0m
+2026-11-24T11:02:19.4308544Z [36;1m      FILE_SHA="$(sha256sum "$f" | cut -d' ' -f1)"[0m
+2026-11-24T11:02:19.4308919Z [36;1m      CERT_SHA="N/A"[0m
+2026-11-24T11:02:19.4309223Z [36;1m      if [ -n "$APKSIGNER" ]; then[0m
+2026-11-24T11:02:19.4309938Z [36;1m        CERT_SHA="$("$APKSIGNER" verify --print-certs "$f" 2>/dev/null | awk -F': ' '/Signer #1 certificate SHA-256 digest:/ {print $2; exit}' || echo 'N/A')"[0m
+2026-11-24T11:02:19.4310646Z [36;1m      fi[0m
+2026-11-24T11:02:19.4311018Z [36;1m      echo "| \`$(basename "$f")\` | ${SIZE} | \`${CERT_SHA}\` | \`${FILE_SHA}\` |"[0m
+2026-11-24T11:02:19.4311444Z [36;1m    done[0m
+2026-11-24T11:02:19.4311686Z [36;1m  fi[0m
+2026-11-24T11:02:19.4311950Z [36;1m  if [ "$HAS_RELEASE" != "true" ]; then[0m
+2026-11-24T11:02:19.4312283Z [36;1m    echo ""[0m
+2026-11-24T11:02:19.4314182Z [36;1m    echo "> **Overwrite-Install Tip**: Debug APK is ALWAYS signed with the fixed \`debug.keystore.base64\` in this repository (never randomly regenerated), so future builds overwrite-install cleanly on your Xiaomi 14 Pro without losing data. To use your own fixed Release signing key instead, configure \`KEYSTORE_BASE64\`, \`STORE_PASSWORD\`, and \`KEY_PASSWORD\` (alias \`upload\`) in **Settings → Secrets and variables → Actions**."[0m
+2026-11-24T11:02:19.4316123Z [36;1m  fi[0m
+2026-11-24T11:02:19.4316390Z [36;1m} >> "$GITHUB_STEP_SUMMARY"[0m
+2026-11-24T11:02:19.4348383Z shell: /usr/bin/bash -e {0}
+2026-11-24T11:02:19.4348695Z env:
+2026-11-24T11:02:19.4349078Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:02:19.4349970Z   JAVA_HOME_21_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:02:19.4350809Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2026-11-24T11:02:19.4351374Z   GRADLE_USER_HOME: /home/runner/.gradle
+2026-11-24T11:02:19.4351759Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2026-11-24T11:02:19.4352137Z   GRADLE_BUILD_ACTION_CACHE_RESTORED: true
+2026-11-24T11:02:19.4352637Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2026-11-24T11:02:19.4353404Z   DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+2026-11-24T11:02:19.4353809Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2026-11-24T11:02:19.4354128Z   HAS_RELEASE: false
+2026-11-24T11:02:19.4354384Z ##[endgroup]
+2026-11-24T11:02:19.7970337Z ##[group]Run actions/upload-artifact@v4
+2026-11-24T11:02:19.7970719Z with:
+2026-11-24T11:02:19.7970972Z   name: GitNote-APK-12
+2026-11-24T11:02:19.7971249Z   path: dist/*.apk
+2026-11-24T11:02:19.7971511Z   retention-days: 30
+2026-11-24T11:02:19.7971791Z   if-no-files-found: error
+2026-11-24T11:02:19.7972082Z   compression-level: 6
+2026-11-24T11:02:19.7972345Z   overwrite: false
+2026-11-24T11:02:19.7972603Z   include-hidden-files: false
+2026-11-24T11:02:19.7972898Z env:
+2026-11-24T11:02:19.7973495Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:02:19.7974080Z   JAVA_HOME_21_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:02:19.7974587Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2026-11-24T11:02:19.7974948Z   GRADLE_USER_HOME: /home/runner/.gradle
+2026-11-24T11:02:19.7975288Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2026-11-24T11:02:19.7975643Z   GRADLE_BUILD_ACTION_CACHE_RESTORED: true
+2026-11-24T11:02:19.7976173Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2026-11-24T11:02:19.7976714Z   DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+2026-11-24T11:02:19.7977090Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2026-11-24T11:02:19.7977416Z ##[endgroup]
+2026-11-24T11:02:19.9718259Z (node:3442) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-24T11:02:19.9721235Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-24T11:02:19.9781582Z With the provided path, there will be 1 file uploaded
+2026-11-24T11:02:19.9786166Z Artifact name is valid!
+2026-11-24T11:02:19.9787269Z Root directory input is valid!
+2026-11-24T11:02:20.3507630Z Beginning upload of artifact content to blob storage
+2026-11-24T11:02:20.6177433Z (node:3442) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-11-24T11:02:21.4654968Z Uploaded bytes 8388608
+2026-11-24T11:02:21.7698102Z Uploaded bytes 16777216
+2026-11-24T11:02:21.8920946Z Uploaded bytes 20378744
+2026-11-24T11:02:21.9687089Z Finished uploading artifact content to blob storage!
+2026-11-24T11:02:21.9688323Z SHA256 digest of uploaded artifact zip is c44b171409304fbd1aacb59c1963554c3bde1cf751d455af1a4571ee0c998c38
+2026-11-24T11:02:21.9690541Z Finalizing artifact upload
+2026-11-24T11:02:22.3578751Z Artifact GitNote-APK-12.zip successfully finalized. Artifact ID 14913461526
+2026-11-24T11:02:22.3579968Z Artifact GitNote-APK-12 has been successfully uploaded! Final size is 20378744 bytes. Artifact ID is 14913461526
+2026-11-24T11:02:22.3586332Z Artifact download URL: https://github.com/jasonqiao36/git-note/actions/runs/45380107013/artifacts/14913461526
+2026-11-24T11:02:22.3774033Z ##[group]Run rm -f debug.keystore my-upload-key.jks
+2026-11-24T11:02:22.3774548Z [36;1mrm -f debug.keystore my-upload-key.jks[0m
+2026-11-24T11:02:22.3807068Z shell: /usr/bin/bash -e {0}
+2026-11-24T11:02:22.3807377Z env:
+2026-11-24T11:02:22.3807761Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:02:22.3808352Z   JAVA_HOME_21_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64
+2026-11-24T11:02:22.3808855Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2026-11-24T11:02:22.3809214Z   GRADLE_USER_HOME: /home/runner/.gradle
+2026-11-24T11:02:22.3809558Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2026-11-24T11:02:22.3809916Z   GRADLE_BUILD_ACTION_CACHE_RESTORED: true
+2026-11-24T11:02:22.3810420Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2026-11-24T11:02:22.3810979Z   DEVELOCITY_INJECTION_CUSTOM_VALUE: gradle-actions
+2026-11-24T11:02:22.3811359Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2026-11-24T11:02:22.3811710Z ##[endgroup]
+2026-11-24T11:02:22.4025521Z Post job cleanup.
+2026-11-24T11:02:22.6499496Z In post-action step
+2026-11-24T11:02:22.6512647Z ##[group]Stopping Gradle daemons
+2026-11-24T11:02:22.6514033Z Stopping Gradle daemons for /home/runner/work/_temp/.gradle-actions/gradle-installations/installs/gradle-9.3.1
+2026-11-24T11:02:22.6531849Z [command]/home/runner/work/_temp/.gradle-actions/gradle-installations/installs/gradle-9.3.1/bin/gradle --stop
+2026-11-24T11:02:23.3727450Z No Gradle daemons are running.
+2026-11-24T11:02:23.3850968Z ##[endgroup]
+2026-11-24T11:02:23.3869993Z ##[group]Provision Gradle >= 9.3.1
+2026-11-24T11:02:24.0069734Z Gradle version 9.3.1 is available at /home/runner/work/_temp/.gradle-actions/gradle-installations/installs/gradle-9.3.1/bin/gradle and >= 9.3.1. Not installing.
+2026-11-24T11:02:24.0070838Z ##[endgroup]
+2026-11-24T11:02:24.0073574Z ##[group]Executing Gradle to clean up caches
+2026-11-24T11:02:24.0074041Z Cleaning up caches last used before 1795518039419
+2026-11-24T11:02:24.0078301Z [command]/home/runner/work/_temp/.gradle-actions/gradle-installations/installs/gradle-9.3.1/bin/gradle -g /home/runner/.gradle -I init.gradle --info --no-daemon --no-scan --build-cache -DGITHUB_DEPENDENCY_GRAPH_ENABLED=false -DGRADLE_ACTIONS_SKIP_BUILD_RESULT_CAPTURE=true noop
+2026-11-24T11:02:24.4793748Z Initialized native services in: /home/runner/.gradle/native
+2026-11-24T11:02:24.4820957Z Initialized jansi services in: /home/runner/.gradle/native
+2026-11-24T11:02:24.7016314Z To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.3.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+2026-11-24T11:02:24.8050592Z Starting process 'Gradle build daemon'. Working directory: /home/runner/.gradle/daemon/9.3.1 Command: /usr/lib/jvm/temurin-21-jdk-amd64/bin/java --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.prefs/java.util.prefs=ALL-UNNAMED --add-opens=java.base/java.nio.charset=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED --add-opens=java.xml/javax.xml.namespace=ALL-UNNAMED --add-opens=java.base/java.time=ALL-UNNAMED -XX:MaxMetaspaceSize=384m -XX:+HeapDumpOnOutOfMemoryError -Xms256m -Xmx512m -Dfile.encoding=UTF-8 -Duser.country -Duser.language=en -Duser.variant -cp /home/runner/work/_temp/.gradle-actions/gradle-installations/installs/gradle-9.3.1/lib/gradle-daemon-main-9.3.1.jar -javaagent:/home/runner/work/_temp/.gradle-actions/gradle-installations/installs/gradle-9.3.1/lib/agents/gradle-instrumentation-agent-9.3.1.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 9.3.1
+2026-11-24T11:02:24.8061129Z Successfully started process 'Gradle build daemon'
+2026-11-24T11:02:25.8024719Z An attempt to start the daemon took 1.028 secs.
+2026-11-24T11:02:25.9047077Z The client will now receive all logging from the daemon (pid: 3571). The daemon log file: /home/runner/.gradle/daemon/9.3.1/daemon-3571.out.log
+2026-11-24T11:02:25.9054462Z Daemon will be stopped at the end of the build 
+2026-11-24T11:02:26.1999381Z Using 4 worker leases.
+2026-11-24T11:02:26.3013403Z Operational build model parameters: {requiresToolingModels=false, parallelProjectExecution=false, configureOnDemand=false, configurationCache=false, configurationCacheParallelStore=false, configurationCacheParallelLoad=true, isolatedProjects=false, parallelProjectConfiguration=false, intermediateModelCache=false, parallelToolingApiActions=false, invalidateCoupledProjects=false, modelAsProjectDependency=false, resilientModelBuilding=false}
+2026-11-24T11:02:26.7006000Z Received JVM installation metadata from '/usr/lib/jvm/temurin-21-jdk-amd64': {JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64, JAVA_VERSION=21.0.13, JAVA_VENDOR=Eclipse Adoptium, RUNTIME_NAME=OpenJDK Runtime Environment, RUNTIME_VERSION=21.0.13+9-LTS, VM_NAME=OpenJDK 64-Bit Server VM, VM_VERSION=21.0.13+9-LTS, VM_VENDOR=Eclipse Adoptium, OS_ARCH=amd64}
+2026-11-24T11:02:27.0002248Z Watching the file system is configured to be enabled if available
+2026-11-24T11:02:27.0013728Z Now considering [/home/runner/work/_temp/dummy-cleanup-project] as hierarchies to watch
+2026-11-24T11:02:27.0015220Z File system watching is active
+2026-11-24T11:02:27.3999610Z Caching disabled for Groovy DSL script compilation (cp_init) because:
+2026-11-24T11:02:27.4002773Z   Build cache is disabled
+2026-11-24T11:02:27.4003774Z   Not worth caching.
+2026-11-24T11:02:27.5014400Z Compiling initialization script '/home/runner/work/_temp/dummy-cleanup-project/init.gradle' using SubsetScriptTransformer.
+2026-11-24T11:02:28.1004858Z Caching disabled for Groovy DSL script compilation (init) because:
+2026-11-24T11:02:28.1024328Z   Build cache is disabled
+2026-11-24T11:02:28.1034373Z   Not worth caching.
+2026-11-24T11:02:28.1035445Z Compiling initialization script '/home/runner/work/_temp/dummy-cleanup-project/init.gradle' using BuildScriptTransformer.
+2026-11-24T11:02:28.7011513Z gradle/actions: Not capturing build results
+2026-11-24T11:02:28.8000204Z Starting Build
+2026-11-24T11:02:28.9002417Z Settings evaluated using settings file '/home/runner/work/_temp/dummy-cleanup-project/settings.gradle'.
+2026-11-24T11:02:28.9015625Z Using local directory build cache for the root build (location = /home/runner/.gradle/caches/build-cache-1, remove unused entries = older than 2026-11-24 11:00:39 UTC).
+2026-11-24T11:02:29.0001299Z Projects loaded. Root project using build file '/home/runner/work/_temp/dummy-cleanup-project/build.gradle'.
+2026-11-24T11:02:29.0002950Z Included projects: [root project 'dummy-cleanup-project']
+2026-11-24T11:02:29.2023875Z 
+2026-11-24T11:02:29.2054581Z > Configure project :
+2026-11-24T11:02:29.2056524Z Evaluating root project 'dummy-cleanup-project' using build file '/home/runner/work/_temp/dummy-cleanup-project/build.gradle'.
+2026-11-24T11:02:29.2084113Z All projects evaluated.
+2026-11-24T11:02:29.2095098Z Task name matched 'noop'
+2026-11-24T11:02:29.2095933Z Selected primary task 'noop' from project :
+2026-11-24T11:02:29.3017480Z Tasks to be executed: [task ':noop']
+2026-11-24T11:02:29.3018400Z Tasks that were excluded: []
+2026-11-24T11:02:29.3019279Z Resolve mutations for :noop (Thread[#51,Execution worker,5,main]) started.
+2026-11-24T11:02:29.3020270Z :noop (Thread[#51,Execution worker,5,main]) started.
+2026-11-24T11:02:29.3020837Z 
+2026-11-24T11:02:29.3021247Z > Task :noop UP-TO-DATE
+2026-11-24T11:02:29.3021872Z Skipping task ':noop' as it has no actions.
+2026-11-24T11:02:29.3022379Z 
+2026-11-24T11:02:29.3023004Z BUILD SUCCESSFUL in 5s
+2026-11-24T11:02:29.3024648Z Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.3.1/userguide/configuration_cache_enabling.html
+2026-11-24T11:02:29.4002368Z Build cache (/home/runner/.gradle/caches/build-cache-1) removing files not accessed on or after Tue Nov 24 11:00:39 UTC 2026.
+2026-11-24T11:02:29.4004225Z Build cache (/home/runner/.gradle/caches/build-cache-1) cleanup deleted 15 files/directories.
+2026-11-24T11:02:29.4006396Z Build cache (/home/runner/.gradle/caches/build-cache-1) cleaned up in 0.044 secs.
+2026-11-24T11:02:29.4008179Z dependencies-accessors (/home/runner/.gradle/caches/9.3.1/dependencies-accessors) removing files not accessed on or after Tue Nov 24 11:00:39 UTC 2026.
+2026-11-24T11:02:29.4010317Z dependencies-accessors (/home/runner/.gradle/caches/9.3.1/dependencies-accessors) cleanup deleted 0 files/directories.
+2026-11-24T11:02:29.4012171Z dependencies-accessors (/home/runner/.gradle/caches/9.3.1/dependencies-accessors) cleaned up in 0.0 secs.
+2026-11-24T11:02:29.4014650Z groovy-dsl (/home/runner/.gradle/caches/9.3.1/groovy-dsl) removing files not accessed on or after Tue Nov 24 11:00:39 UTC 2026.
+2026-11-24T11:02:29.4016427Z groovy-dsl (/home/runner/.gradle/caches/9.3.1/groovy-dsl) cleanup deleted 2 files/directories.
+2026-11-24T11:02:29.4018017Z groovy-dsl (/home/runner/.gradle/caches/9.3.1/groovy-dsl) cleaned up in 0.011 secs.
+2026-11-24T11:02:29.4019851Z Artifact transforms cache (/home/runner/.gradle/caches/9.3.1/transforms) removing files not accessed on or after Tue Nov 24 11:00:39 UTC 2026.
+2026-11-24T11:02:29.6696151Z Artifact transforms cache (/home/runner/.gradle/caches/9.3.1/transforms) cleanup deleted 18 files/directories.
+2026-11-24T11:02:29.6748524Z Artifact transforms cache (/home/runner/.gradle/caches/9.3.1/transforms) cleaned up in 0.227 secs.
+2026-11-24T11:02:29.6769222Z jars (/home/runner/.gradle/caches/jars-9) cleanup deleted 0 files/directories.
+2026-11-24T11:02:29.6770664Z jars (/home/runner/.gradle/caches/jars-9) removing files not accessed on or after Tue Nov 24 11:00:39 UTC 2026.
+2026-11-24T11:02:29.6772082Z jars (/home/runner/.gradle/caches/jars-9) cleanup deleted 1 files/directories.
+2026-11-24T11:02:29.6773382Z jars (/home/runner/.gradle/caches/jars-9) cleaned up in 0.004 secs.
+2026-11-24T11:02:29.6774655Z artifact cache (/home/runner/.gradle/caches/modules-2) cleanup deleted 0 files/directories.
+2026-11-24T11:02:29.6776414Z artifact cache (/home/runner/.gradle/caches/modules-2) [subdir: /home/runner/.gradle/caches/modules-2/resources-2.1] cleanup deleted 0 files/directories.
+2026-11-24T11:02:29.6778758Z artifact cache (/home/runner/.gradle/caches/modules-2) [subdir: /home/runner/.gradle/caches/modules-2/resources-2.1] removing files not accessed on or after Tue Nov 24 11:00:39 UTC 2026.
+2026-11-24T11:02:29.6781191Z artifact cache (/home/runner/.gradle/caches/modules-2) [subdir: /home/runner/.gradle/caches/modules-2/resources-2.1] cleanup deleted 0 files/directories.
+2026-11-24T11:02:29.6783521Z artifact cache (/home/runner/.gradle/caches/modules-2) [subdir: /home/runner/.gradle/caches/modules-2/files-2.1] cleanup deleted 0 files/directories.
+2026-11-24T11:02:29.6785819Z artifact cache (/home/runner/.gradle/caches/modules-2) [subdir: /home/runner/.gradle/caches/modules-2/files-2.1] removing files not accessed on or after Tue Nov 24 11:00:39 UTC 2026.
+2026-11-24T11:02:29.6791751Z artifact cache (/home/runner/.gradle/caches/modules-2) [subdir: /home/runner/.gradle/caches/modules-2/files-2.1] cleanup deleted 2 files/directories.
+2026-11-24T11:02:29.6794305Z artifact cache (/home/runner/.gradle/caches/modules-2) [subdir: /home/runner/.gradle/caches/modules-2/metadata-2.107] cleanup deleted 0 files/directories.
+2026-11-24T11:02:29.6795923Z artifact cache (/home/runner/.gradle/caches/modules-2) cleanup deleted 0 files/directories.
+2026-11-24T11:02:29.6797078Z artifact cache (/home/runner/.gradle/caches/modules-2) cleaned up in 0.041 secs.
+2026-11-24T11:02:29.7778075Z ##[endgroup]
+2026-11-24T11:02:29.7778971Z ##[group]Caching Gradle state
+2026-11-24T11:02:29.7879966Z Not saving configuration-cache state, as no encryption key was provided
+2026-11-24T11:02:30.0160770Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/git-note/git-note --files-from manifest.txt --use-compress-program zstdmt
+2026-11-24T11:02:30.0603936Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/git-note/git-note --files-from manifest.txt --use-compress-program zstdmt
+2026-11-24T11:02:30.0750058Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/git-note/git-note --files-from manifest.txt --use-compress-program zstdmt
+2026-11-24T11:02:30.2689217Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/git-note/git-note --files-from manifest.txt --use-compress-program zstdmt
+2026-11-24T11:02:30.6935544Z Sent 64480 of 64480 (100.0%), 0.2 MBs/sec
+2026-11-24T11:02:30.7389179Z Sent 97096 of 97096 (100.0%), 0.2 MBs/sec
+2026-11-24T11:02:30.7575547Z Sent 97333 of 97333 (100.0%), 0.2 MBs/sec
+2026-11-24T11:02:30.9727783Z Saved cache entry with key gradle-instrumented-jars-v1-f430b52f36ffcdbbf2c65dcf0fe73626 from /home/runner/.gradle/caches/jars-*/*/ in 985ms
+2026-11-24T11:02:30.9890066Z Saved cache entry with key gradle-kotlin-dsl-v1-7f6e617f0f1f8328add1082520314743 from /home/runner/.gradle/caches/*/kotlin-dsl/accessors/*/,/home/runner/.gradle/caches/*/kotlin-dsl/scripts/*/ in 987ms
+2026-11-24T11:02:31.0516658Z Saved cache entry with key gradle-groovy-dsl-v1-9a7cd435483a04534b450b56a2121a87 from /home/runner/.gradle/caches/*/groovy-dsl/*/ in 1023ms
+2026-11-24T11:02:31.4256134Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/git-note/git-note --files-from manifest.txt --use-compress-program zstdmt
+2026-11-24T11:02:32.5554780Z Sent 0 of 346088787 (0.0%), 0.0 MBs/sec
+2026-11-24T11:02:33.5538841Z Sent 10544467 of 346088787 (3.0%), 5.0 MBs/sec
+2026-11-24T11:02:34.1912101Z Sent 346088787 of 346088787 (100.0%), 125.0 MBs/sec
+2026-11-24T11:02:34.4682429Z Saved cache entry with key gradle-dependencies-v1-2b7250743a368f6600eff9de31851006 from /home/runner/.gradle/caches/modules-*/files-*/*/*/*/* in 4495ms
+2026-11-24T11:02:34.7484731Z Sent 0 of 198240245 (0.0%), 0.0 MBs/sec
+2026-11-24T11:02:35.7489064Z Sent 131131381 of 198240245 (66.1%), 62.5 MBs/sec
+2026-11-24T11:02:35.9211349Z Sent 198240245 of 198240245 (100.0%), 87.0 MBs/sec
+2026-11-24T11:02:36.1924961Z Saved cache entry with key gradle-transforms-v1-f1c9ebd062f06a9642029c96655619dc from /home/runner/.gradle/caches/transforms-4/*/,/home/runner/.gradle/caches/*/transforms/*/ in 5504ms
+2026-11-24T11:02:36.9598134Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/git-note/git-note --files-from manifest.txt --use-compress-program zstdmt
+2026-11-24T11:02:38.3366390Z Sent 28116530 of 28116530 (100.0%), 27.4 MBs/sec
+2026-11-24T11:02:38.5961609Z Saved cache entry with key gradle-home-v1|Linux-X64|build-apk[c585a5624ecd68c767cac3aa9db97875]-9b6c4246108e928a40297835752038dee5dcc4dc from /home/runner/.gradle/caches,/home/runner/.gradle/notifications,/home/runner/.gradle/.setup-gradle in 1649ms
+2026-11-24T11:02:38.5963096Z ##[endgroup]
+2026-11-24T11:02:38.5971170Z Generating Job Summary
+2026-11-24T11:02:38.5985112Z Completed post-action step
+2026-11-24T11:02:38.6239000Z Post job cleanup.
+2026-11-24T11:02:38.7625428Z (node:3685) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-11-24T11:02:38.7626977Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-24T11:02:38.7852178Z Post job cleanup.
+2026-11-24T11:02:38.8739776Z [command]/usr/bin/git version
+2026-11-24T11:02:38.8785471Z git version 2.56.1
+2026-11-24T11:02:38.8826676Z Temporarily overriding HOME='/home/runner/work/_temp/f10df4e1-5dc8-4bf1-b259-ba5593b4ced7' before making global git config changes
+2026-11-24T11:02:38.8828719Z Adding repository directory to the temporary git global config as a safe directory
+2026-11-24T11:02:38.8833488Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/git-note/git-note
+2026-11-24T11:02:38.8875727Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-11-24T11:02:38.8934376Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-11-24T11:02:38.9252681Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-11-24T11:02:38.9280637Z http.https://github.com/.extraheader
+2026-11-24T11:02:38.9293931Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-11-24T11:02:38.9341539Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-11-24T11:02:38.9669227Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-11-24T11:02:38.9704449Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-11-24T11:02:39.0147300Z Cleaning up orphan processes
+2026-11-24T11:02:39.0606058Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-java@v4, actions/upload-artifact@v4, gradle/actions/setup-gradle@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

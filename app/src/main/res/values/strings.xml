@@ -110,7 +110,7 @@
     <string name="update_repo_hint">例如：yourname/gitnote-android</string>
     <string name="update_token_label">私有仓库 Token（可选）</string>
     <string name="update_token_hint">留空则复用当前笔记仓库的 Token</string>
-    <string name="update_token_helper">私有仓库检查及下载 Release APK 需具备 Contents 只读权限，Token 经系统 Keystore 加密存于本机。</string>
+    <string name="update_token_helper">检查及下载 Release APK 需具备 Contents 只读权限；若需拉取 Actions 构建产物，Token 还需具备 Actions 只读权限。Token 经系统 Keystore 加密存于本机。</string>
     <string name="update_auto_check_label">启动时自动检查新版本</string>
     <string name="update_save_config">保存配置</string>
     <string name="update_clear_config">清除</string>

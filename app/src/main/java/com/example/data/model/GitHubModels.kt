@@ -161,7 +161,9 @@ data class AppUpdateInfo(
     val apkAssetName: String?,
     val apkApiUrl: String?,
     val apkSizeBytes: Long,
-    val isNewer: Boolean
+    val isNewer: Boolean,
+    val isZipArchive: Boolean = false,
+    val requiresTokenForDownload: Boolean = false
 )
 
 sealed interface UpdateDownloadState {
@@ -196,6 +198,7 @@ data class GitHubReleaseResponse(
     val body: String? = null,
     @Json(name = "html_url") val htmlUrl: String = "",
     @Json(name = "published_at") val publishedAt: String? = null,
+    @Json(name = "created_at") val createdAt: String? = null,
     val draft: Boolean = false,
     val prerelease: Boolean = false,
     val assets: List<GitHubReleaseAsset> = emptyList()
@@ -208,4 +211,28 @@ data class GitHubReleaseAsset(
     val name: String = "",
     val size: Long = 0L,
     @Json(name = "browser_download_url") val browserDownloadUrl: String = ""
+)
+
+@JsonClass(generateAdapter = true)
+data class GitHubArtifactsResponse(
+    @Json(name = "total_count") val totalCount: Int = 0,
+    val artifacts: List<GitHubArtifactItem> = emptyList()
+)
+
+@JsonClass(generateAdapter = true)
+data class GitHubArtifactItem(
+    val id: Long = 0L,
+    val name: String = "",
+    @Json(name = "size_in_bytes") val sizeInBytes: Long = 0L,
+    @Json(name = "archive_download_url") val archiveDownloadUrl: String = "",
+    val expired: Boolean = false,
+    @Json(name = "created_at") val createdAt: String? = null,
+    @Json(name = "workflow_run") val workflowRun: GitHubArtifactWorkflowRun? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class GitHubArtifactWorkflowRun(
+    val id: Long = 0L,
+    @Json(name = "head_branch") val headBranch: String? = null,
+    @Json(name = "head_sha") val headSha: String? = null
 )
